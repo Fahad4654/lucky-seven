@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Coins, Star, Diamond, Bell, Cherry, Award, Clover } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
+import { useCredits } from '@/context/credits-context';
 
 const symbols = [
   { icon: <Cherry className="h-16 w-16 text-red-500" />, value: 'cherry' },
@@ -65,7 +66,7 @@ const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: React.Rea
 export default function SlotMachine() {
     const [reels, setReels] = useState< {icon: React.ReactNode, value: string}[][]>([]);
     const [spinning, setSpinning] = useState(false);
-    const [balance, setBalance] = useState(1000);
+    const { credits, setCredits } = useCredits();
     const [lastWin, setLastWin] = useState<number | null>(null);
     const { toast } = useToast();
 
@@ -92,7 +93,7 @@ export default function SlotMachine() {
             case 'star': winAmount = 200; break;
             case 'seven': winAmount = 500; break;
         }
-        setBalance(prev => prev + winAmount);
+        setCredits(prev => prev + winAmount);
         setLastWin(winAmount);
         toast({
             title: "You Won!",
@@ -105,7 +106,7 @@ export default function SlotMachine() {
     };
 
     const handleSpin = () => {
-        if (balance < 10) {
+        if (credits < 10) {
             toast({
                 title: "Insufficient Funds",
                 description: "You need at least 10 credits to spin.",
@@ -113,7 +114,7 @@ export default function SlotMachine() {
             });
             return;
         }
-        setBalance(prev => prev - 10);
+        setCredits(prev => prev - 10);
         setSpinning(true);
         setLastWin(null);
 
@@ -144,7 +145,7 @@ export default function SlotMachine() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
                     <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
                         <p className="text-sm font-body text-muted-foreground">Balance</p>
-                        <p className="text-2xl font-headline text-primary font-bold">{balance}</p>
+                        <p className="text-2xl font-headline text-primary font-bold">{credits.toLocaleString()}</p>
                     </div>
                     <div className="bg-background/50 p-4 rounded-lg border border-primary/30 col-span-1 md:col-span-1">
                         <p className="text-sm font-body text-muted-foreground">Last Win</p>
