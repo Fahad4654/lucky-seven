@@ -27,11 +27,11 @@ export default function RootLayout({
       <body className={cn('font-body antialiased')}>
         <CreditsProvider>
           <SidebarProvider>
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen w-full">
               <AppSidebar />
               <div className="flex flex-1 flex-col">
                 <AppHeader />
-                <main className="flex-1 p-4 md:p-8">
+                <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
                   {children}
                 </main>
               </div>
