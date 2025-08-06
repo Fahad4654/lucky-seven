@@ -21,8 +21,8 @@ const diceIcons = [
 ];
 
 export default function DiceRollerCard() {
-    const [numDice, setNumDice] = useState(2);
-    const [numSides, setNumSides] = useState(6);
+    const [numDice, setNumDice] = useState(3);
+    const numSides = 6;
     const [results, setResults] = useState<number[]>([]);
     const [total, setTotal] = useState<number | null>(null);
     const [winStatus, setWinStatus] = useState<'win' | 'loss' | null>(null);
@@ -76,27 +76,15 @@ export default function DiceRollerCard() {
                 <CardDescription className="font-body">Bet High (11+) or Low (&lt;11) and roll the dice!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="num-dice">Number of Dice</Label>
-                        <Input 
-                            id="num-dice" 
-                            type="number" 
-                            value={numDice} 
-                            onChange={(e) => setNumDice(Math.max(1, parseInt(e.target.value)))}
-                            min="1"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="num-sides">Number of Sides</Label>
-                        <Input 
-                            id="num-sides" 
-                            type="number" 
-                            value={numSides} 
-                            onChange={(e) => setNumSides(Math.max(2, parseInt(e.target.value)))}
-                            min="2"
-                        />
-                    </div>
+                <div className="space-y-2">
+                    <Label htmlFor="num-dice">Number of Dice</Label>
+                    <Input 
+                        id="num-dice" 
+                        type="number" 
+                        value={numDice} 
+                        onChange={(e) => setNumDice(Math.max(3, parseInt(e.target.value)))}
+                        min="3"
+                    />
                 </div>
 
                 <RadioGroup onValueChange={(value) => setBetType(value as 'high' | 'low')} className="flex justify-center gap-4">
