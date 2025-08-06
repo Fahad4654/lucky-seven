@@ -1,10 +1,14 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Spade, Heart, Diamond, Club, Repeat, User, Bot } from "lucide-react";
+import { useCredits } from "@/context/credits-context";
 
 type Suit = 'Spades' | 'Hearts' | 'Diamonds' | 'Clubs';
 type Rank = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'A';
@@ -55,6 +59,8 @@ export default function BlackjackCard() {
     const [dealerScore, setDealerScore] = useState(0);
     const [gameState, setGameState] = useState<'betting' | 'playerTurn' | 'dealerTurn' | 'gameOver'>('betting');
     const [winner, setWinner] = useState<'Player' | 'Dealer' | 'Push' | null>(null);
+    const [betAmount, setBetAmount] = useState(10);
+    const { credits, setCredits } = useCredits();
     const { toast } = useToast();
 
     const createDeck = () => {
@@ -93,8 +99,18 @@ export default function BlackjackCard() {
         return score;
     };
 
-    const dealCards = useCallback(() => {
-        setGameState('betting');
+    const handleDeal = () => {
+        if(credits < betAmount) {
+            toast({
+                title: "Insufficient Credits",
+                description: `You need at least ${betAmount} credits to play.`,
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setCredits(c => c - betAmount);
+        setGameState('playerTurn');
         setWinner(null);
         let freshDeck = shuffleDeck(createDeck());
         
@@ -108,23 +124,30 @@ export default function BlackjackCard() {
         setDealerScore(calculateScore(dealerInitialHand));
 
         setDeck(freshDeck);
-        setGameState('playerTurn');
+    };
+
+    const startNewGame = useCallback(() => {
+        setGameState('betting');
+        setWinner(null);
+        setPlayerHand([]);
+        setDealerHand([]);
     }, []);
 
     useEffect(() => {
-        dealCards();
-    }, [dealCards]);
+        startNewGame();
+    }, [startNewGame]);
 
     useEffect(() => {
+        if (gameState !== 'playerTurn') return;
         if (playerScore > 21) {
             setWinner('Dealer');
             setGameState('gameOver');
         } else if (playerScore === 21 && playerHand.length === 2) {
-             // Blackjack
+            // Blackjack
             setWinner('Player');
             setGameState('gameOver');
         }
-    }, [playerScore, playerHand.length]);
+    }, [playerScore, playerHand.length, gameState]);
 
     const playerHit = () => {
         if (gameState !== 'playerTurn' || !deck.length) return;
@@ -137,63 +160,77 @@ export default function BlackjackCard() {
 
     const playerStand = useCallback(() => {
         setGameState('dealerTurn');
-        
-        let currentDealerHand = [...dealerHand];
-        let currentDeck = [...deck];
-        let score = calculateScore(currentDealerHand);
-
-        while(score < 17 && currentDeck.length > 0) {
-            const newCard = currentDeck.pop()!;
-            currentDealerHand.push(newCard);
-            score = calculateScore(currentDealerHand);
-        }
-
-        setDealerHand(currentDealerHand);
-        setDealerScore(score);
-        setDeck(currentDeck);
-        
-        // Determine winner
-        if (score > 21 || playerScore > score) {
-            setWinner('Player');
-        } else if (playerScore < score) {
-            setWinner('Dealer');
-        } else {
-            setWinner('Push');
-        }
-        setGameState('gameOver');
-
-    }, [dealerHand, deck, playerScore]);
+    }, []);
 
     useEffect(() => {
         if (gameState === 'dealerTurn') {
-            playerStand();
+            let currentDealerHand = [...dealerHand];
+            let currentDeck = [...deck];
+            let score = calculateScore(currentDealerHand);
+
+            while(score < 17 && currentDeck.length > 0) {
+                const newCard = currentDeck.pop()!;
+                currentDealerHand.push(newCard);
+                score = calculateScore(currentDealerHand);
+            }
+
+            setDealerHand(currentDealerHand);
+            setDealerScore(score);
+            setDeck(currentDeck);
+            
+            // Determine winner
+            if (score > 21 || playerScore > score) {
+                setWinner('Player');
+            } else if (playerScore < score) {
+                setWinner('Dealer');
+            } else {
+                setWinner('Push');
+            }
+            setGameState('gameOver');
         }
-    }, [gameState, playerStand]);
+    }, [gameState, dealerHand, deck, playerScore]);
     
     useEffect(() => {
         if (winner) {
-            toast({
-                title: winner === 'Push' ? 'It\'s a Push!' : `Winner: ${winner}!`,
-                description: winner === 'Player' ? 'You win!' : (winner === 'Dealer' ? 'Dealer wins.' : 'Tied game.'),
-            });
+            let winAmount = 0;
+            let title = '';
+            let description = '';
+
+            if (winner === 'Player') {
+                winAmount = playerScore === 21 && playerHand.length === 2 ? betAmount * 2.5 : betAmount * 2;
+                title = 'You Win!';
+                description = `You won ${winAmount.toLocaleString()} credits!`;
+            } else if (winner === 'Dealer') {
+                winAmount = 0; // Loss is already handled
+                title = 'Dealer Wins!';
+                description = `You lost ${betAmount.toLocaleString()} credits.`;
+            } else { // Push
+                winAmount = betAmount;
+                title = "It's a Push!";
+                description = "Your bet has been returned.";
+            }
+
+            setCredits(c => c + winAmount);
+            toast({ title, description });
         }
-    }, [winner, toast]);
+    }, [winner, toast, betAmount, setCredits, playerScore, playerHand.length]);
 
     return (
         <Card className="w-full max-w-4xl mx-auto">
             <CardHeader>
                 <CardTitle className="font-headline text-4xl text-primary">Blackjack</CardTitle>
-                <CardDescription className="font-body">The classic card game of 21.</CardDescription>
+                <CardDescription className="font-body">Get closer to 21 than the dealer to win!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
                 {/* Dealer's Hand */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-headline flex items-center gap-2">
-                        <Bot /> Dealer's Hand ({gameState === 'playerTurn' ? '?' : dealerScore})
+                        <Bot /> Dealer's Hand ({gameState === 'playerTurn' || gameState === 'betting' ? '?' : dealerScore})
                     </h3>
                     <div className="flex space-x-2 h-40 items-center">
+                        {dealerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-24 h-36 bg-muted rounded-lg" />)}
                         {dealerHand.map((card, index) => (
-                            <PlayingCard key={index} card={card} hidden={gameState === 'playerTurn' && index === 1} />
+                            <PlayingCard key={index} card={card} hidden={(gameState === 'playerTurn' || gameState === 'betting') && index === 1} />
                         ))}
                     </div>
                 </div>
@@ -204,6 +241,7 @@ export default function BlackjackCard() {
                         <User /> Your Hand ({playerScore})
                     </h3>
                     <div className="flex space-x-2 h-40 items-center">
+                        {playerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-24 h-36 bg-muted rounded-lg" />)}
                         {playerHand.map((card, index) => (
                             <PlayingCard key={index} card={card} />
                         ))}
@@ -212,10 +250,28 @@ export default function BlackjackCard() {
 
             </CardContent>
             <CardFooter className="flex-col space-y-4">
-                <div className="flex space-x-4">
-                    <Button onClick={playerHit} disabled={gameState !== 'playerTurn'} className="w-32 text-lg font-headline">Hit</Button>
-                    <Button onClick={() => setGameState('dealerTurn')} disabled={gameState !== 'playerTurn'} variant="outline" className="w-32 text-lg font-headline">Stand</Button>
-                </div>
+                {gameState === 'betting' && (
+                     <div className="flex flex-col items-center space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="bet-amount">Bet Amount</Label>
+                            <Input 
+                                id="bet-amount" 
+                                type="number" 
+                                value={betAmount} 
+                                onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                                min="1"
+                                className="w-48 text-center"
+                            />
+                        </div>
+                        <Button onClick={handleDeal} className="w-48 text-lg font-headline">Deal</Button>
+                    </div>
+                )}
+                {gameState === 'playerTurn' && (
+                    <div className="flex space-x-4">
+                        <Button onClick={playerHit} className="w-32 text-lg font-headline">Hit</Button>
+                        <Button onClick={playerStand} variant="outline" className="w-32 text-lg font-headline">Stand</Button>
+                    </div>
+                )}
                  {gameState === 'gameOver' && (
                     <div className="text-center p-4 rounded-lg bg-background/50 w-full">
                         <h3 className="text-3xl font-bold font-headline mb-2">
@@ -223,7 +279,7 @@ export default function BlackjackCard() {
                            {winner === 'Dealer' && <span className="text-red-500">Dealer Wins!</span>}
                            {winner === 'Push' && <span className="text-yellow-400">It's a Push!</span>}
                         </h3>
-                         <Button onClick={dealCards} variant="secondary" className="gap-2">
+                         <Button onClick={startNewGame} variant="secondary" className="gap-2">
                              <Repeat/>
                              Play Again
                          </Button>

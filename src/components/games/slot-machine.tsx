@@ -8,14 +8,16 @@ import { Coins, Star, Diamond, Bell, Cherry, Award, Clover } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
 import { useCredits } from '@/context/credits-context';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 const symbols = [
-  { icon: <Cherry className="h-16 w-16 text-red-500" />, value: 'cherry' },
-  { icon: <Bell className="h-16 w-16 text-yellow-400" />, value: 'bell' },
-  { icon: <Clover className="h-16 w-16 text-green-500" />, value: 'clover' },
-  { icon: <Diamond className="h-16 w-16 text-blue-500" />, value: 'diamond' },
-  { icon: <Star className="h-16 w-16 text-yellow-300" />, value: 'star' },
-  { icon: <Award className="h-16 w-16 text-primary" />, value: 'seven' },
+  { icon: <Cherry className="h-16 w-16 text-red-500" />, value: 'cherry', multiplier: 5 },
+  { icon: <Bell className="h-16 w-16 text-yellow-400" />, value: 'bell', multiplier: 10 },
+  { icon: <Clover className="h-16 w-16 text-green-500" />, value: 'clover', multiplier: 20 },
+  { icon: <Diamond className="h-16 w-16 text-blue-500" />, value: 'diamond', multiplier: 50 },
+  { icon: <Star className="h-16 w-16 text-yellow-300" />, value: 'star', multiplier: 100 },
+  { icon: <Award className="h-16 w-16 text-primary" />, value: 'seven', multiplier: 250 },
 ];
 
 const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: React.ReactNode, value: string}[], startSpinning: boolean, reelIndex: number }) => {
@@ -64,9 +66,10 @@ const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: React.Rea
 
 
 export default function SlotMachine() {
-    const [reels, setReels] = useState< {icon: React.ReactNode, value: string}[][]>([]);
+    const [reels, setReels] = useState< {icon: React.ReactNode, value: string, multiplier: number}[][]>([]);
     const [spinning, setSpinning] = useState(false);
     const { credits, setCredits } = useCredits();
+    const [betAmount, setBetAmount] = useState(10);
     const [lastWin, setLastWin] = useState<number | null>(null);
     const { toast } = useToast();
 
@@ -79,34 +82,31 @@ export default function SlotMachine() {
       ]);
     }, []);
 
-    const checkWin = (finalReels: {icon: React.ReactNode, value: string}[][]) => {
+    const checkWin = (finalReels: {icon: React.ReactNode, value: string, multiplier: number}[][]) => {
       const line = [finalReels[0][0], finalReels[1][0], finalReels[2][0]];
       const isWin = line.every(symbol => symbol.value === line[0].value);
       
       if (isWin) {
-        let winAmount = 0;
-        switch(line[0].value) {
-            case 'cherry': winAmount = 10; break;
-            case 'bell': winAmount = 20; break;
-            case 'clover': winAmount = 50; break;
-            case 'diamond': winAmount = 100; break;
-            case 'star': winAmount = 200; break;
-            case 'seven': winAmount = 500; break;
-        }
+        let winAmount = betAmount * line[0].multiplier;
         setCredits(prev => prev + winAmount);
         setLastWin(winAmount);
         toast({
             title: "You Won!",
-            description: `You won ${winAmount} credits!`,
+            description: `You won ${winAmount.toLocaleString()} credits!`,
             variant: "default",
         });
       } else {
         setLastWin(0);
+        toast({
+            title: "You Lose!",
+            description: `You lost ${betAmount.toLocaleString()} credits.`,
+            variant: "destructive",
+        });
       }
     };
 
     const handleSpin = () => {
-        if (credits < 10) {
+        if (credits < betAmount) {
             toast({
                 title: "Insufficient Funds",
                 description: "You need at least 10 credits to spin.",
@@ -114,7 +114,7 @@ export default function SlotMachine() {
             });
             return;
         }
-        setCredits(prev => prev - 10);
+        setCredits(prev => prev - betAmount);
         setSpinning(true);
         setLastWin(null);
 
@@ -142,20 +142,30 @@ export default function SlotMachine() {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-center">
                     <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
                         <p className="text-sm font-body text-muted-foreground">Balance</p>
                         <p className="text-2xl font-headline text-primary font-bold">{credits.toLocaleString()}</p>
                     </div>
-                    <div className="bg-background/50 p-4 rounded-lg border border-primary/30 col-span-1 md:col-span-1">
+                    <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
                         <p className="text-sm font-body text-muted-foreground">Last Win</p>
                         <p className={cn("text-2xl font-headline font-bold", lastWin && lastWin > 0 ? "text-green-400" : "text-primary")}>
-                            {lastWin !== null ? lastWin : '-'}
+                            {lastWin !== null ? lastWin.toLocaleString() : '-'}
                         </p>
                     </div>
-                    <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
-                        <p className="text-sm font-body text-muted-foreground">Cost</p>
-                        <p className="text-2xl font-headline text-primary font-bold">10</p>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                     <div className="space-y-2">
+                        <Label htmlFor="bet-amount" className="text-center block">Bet Amount</Label>
+                        <Input 
+                            id="bet-amount" 
+                            type="number" 
+                            value={betAmount} 
+                            onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                            min="1"
+                            className="max-w-xs mx-auto text-center text-lg"
+                        />
                     </div>
                 </div>
 
@@ -165,7 +175,7 @@ export default function SlotMachine() {
                     className="w-full h-16 text-2xl font-headline tracking-widest bg-accent hover:bg-accent/90 text-accent-foreground"
                     size="lg"
                 >
-                    {spinning ? 'SPINNING...' : 'SPIN'}
+                    {spinning ? 'SPINNING...' : `SPIN FOR ${betAmount.toLocaleString()}`}
                 </Button>
             </CardContent>
         </Card>
