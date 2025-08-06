@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useToast } from "@/hooks/use-toast";
 
 const diceIcons = [
     <Dice1 key="1" className="w-12 h-12" />,
@@ -24,8 +26,19 @@ export default function DiceRollerCard() {
     const [results, setResults] = useState<number[]>([]);
     const [total, setTotal] = useState<number | null>(null);
     const [winStatus, setWinStatus] = useState<'win' | 'loss' | null>(null);
+    const [betType, setBetType] = useState<'high' | 'low' | null>(null);
+    const { toast } = useToast();
 
     const handleRoll = () => {
+        if (!betType) {
+            toast({
+                title: "No Bet Placed",
+                description: "Please select 'High' or 'Low' before rolling.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         const newResults = [];
         let newTotal = 0;
         for (let i = 0; i < numDice; i++) {
@@ -36,12 +49,14 @@ export default function DiceRollerCard() {
         setResults(newResults);
         setTotal(newTotal);
 
-        // Win condition: all dice are the same
-        if (newResults.length > 1 && newResults.every(val => val === newResults[0])) {
-            setWinStatus('win');
-        } else {
-            setWinStatus('loss');
+        let win = false;
+        if (betType === 'high') {
+            win = newTotal >= 11;
+        } else if (betType === 'low') {
+            win = newTotal < 11;
         }
+        
+        setWinStatus(win ? 'win' : 'loss');
     };
 
     const getDieIcon = (result: number) => {
@@ -58,7 +73,7 @@ export default function DiceRollerCard() {
                     <Dices className="w-10 h-10" />
                     Dice Roller
                 </CardTitle>
-                <CardDescription className="font-body">Roll all dice with the same number to win.</CardDescription>
+                <CardDescription className="font-body">Bet High (11+) or Low (&lt;11) and roll the dice!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -84,6 +99,17 @@ export default function DiceRollerCard() {
                     </div>
                 </div>
 
+                <RadioGroup onValueChange={(value) => setBetType(value as 'high' | 'low')} className="flex justify-center gap-4">
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="low" id="low" />
+                        <Label htmlFor="low" className="text-lg">Low (&lt; 11)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="high" id="high" />
+                        <Label htmlFor="high" className="text-lg">High (11+)</Label>
+                    </div>
+                </RadioGroup>
+
                 <Button onClick={handleRoll} className="w-full text-lg font-headline bg-accent hover:bg-accent/90">
                     Roll Dice
                 </Button>
@@ -96,7 +122,7 @@ export default function DiceRollerCard() {
                                     "text-3xl font-bold font-headline",
                                     winStatus === 'win' ? 'text-green-400' : 'text-red-500'
                                 )}>
-                                   {winStatus === 'win' ? 'You Win!' : 'Try Again!'}
+                                   {winStatus === 'win' ? 'You Win!' : 'You Lose!'}
                                 </h3>
                             </div>
                         )}
