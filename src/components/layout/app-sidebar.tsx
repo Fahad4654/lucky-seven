@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -15,7 +16,7 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
-import { Gem, Spade, Heart, Dice5, Apple } from "lucide-react";
+import { Gem, Spade, Heart, Dice5, Apple, Award } from "lucide-react";
 
 const menuItems = [
   { href: "/", label: "Slot Machine", icon: Gem },
@@ -45,7 +46,7 @@ export default function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href}>
                 <SidebarMenuButton
                   isActive={pathname === item.href}
                   tooltip={{ children: item.label, side: "right" }}
