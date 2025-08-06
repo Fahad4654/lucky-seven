@@ -6,7 +6,7 @@
  * - GenerateFortuneOutput - The return type for the generateFortune function.
  */
 
-import {z} from 'genkit';
+import {z} from 'zod';
 
 export const GenerateFortuneOutputSchema = z.object({
   fortune: z.string().describe('A short, witty, or thoughtful fortune cookie-style message.'),
