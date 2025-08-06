@@ -73,6 +73,7 @@ interface HandResult {
     rank: HandRank;
     value: number;
     hand: CardType[];
+    tieBreakerRanks: number[];
 }
 
 export default function PokerCard() {
@@ -100,47 +101,48 @@ export default function PokerCard() {
     };
 
     const getHandResult = (hand: CardType[]): HandResult => {
-        if(hand.length !== 5) return { rank: 'High Card', value: 0, hand };
+        const rankToValue = (rank: Rank) => ranks.indexOf(rank);
+        const handValues = hand.map(c => rankToValue(c.rank)).sort((a, b) => b - a);
 
-        const rankCounts: { [key in Rank]?: number } = {};
-        const suitCounts: { [key in Suit]?: number } = {};
-        
-        hand.forEach(card => {
-            rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
-            suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
+        const rankCounts: { [key: number]: number } = {};
+        handValues.forEach(value => {
+            rankCounts[value] = (rankCounts[value] || 0) + 1;
         });
-
-        const sortedRanks = hand.map(c => ranks.indexOf(c.rank)).sort((a,b) => a - b);
-        const isFlush = hand.every(card => card.suit === hand[0].suit);
         
-        const isStraight = (() => {
-            const uniqueRanks = [...new Set(sortedRanks)];
-            if(uniqueRanks.length < 5) return false;
-            // Ace-low straight (A, 2, 3, 4, 5) needs special handling
-            const isAceLow = uniqueRanks[0] === 0 && uniqueRanks[1] === 1 && uniqueRanks[2] === 2 && uniqueRanks[3] === 3 && uniqueRanks[4] === 12;
-            if (isAceLow) return true;
+        const counts = Object.values(rankCounts);
+        const pairs = Object.keys(rankCounts).filter(rank => rankCounts[parseInt(rank)] === 2).map(Number).sort((a,b) => b-a);
+        const threes = Object.keys(rankCounts).filter(rank => rankCounts[parseInt(rank)] === 3).map(Number);
+        const fours = Object.keys(rankCounts).filter(rank => rankCounts[parseInt(rank)] === 4).map(Number);
+        const kickers = (ranksToExclude: number[]) => handValues.filter(v => !ranksToExclude.includes(v));
 
+        const isFlush = hand.every(card => card.suit === hand[0].suit);
+        const isStraight = (() => {
+            const uniqueRanks = [...new Set(handValues)].sort((a,b) => a-b);
+            if(uniqueRanks.length < 5) return false;
+            // Ace-low straight
+            const isAceLow = uniqueRanks.join() === "0,1,2,3,12";
+            if (isAceLow) return true;
             for (let i = 0; i < 4; i++) {
-                if(uniqueRanks[i+1] - uniqueRanks[i] !== 1) return false;
+                if (uniqueRanks[i+1] - uniqueRanks[i] !== 1) return false;
             }
             return true;
         })();
         
+        const getStraightHighCard = () => (handValues.includes(12) && handValues.includes(3)) ? 3 : handValues[0];
+
         if (isStraight && isFlush) {
-            const isRoyal = sortedRanks[0] === 8 && sortedRanks[4] === 12; // 10, J, Q, K, A
-            return { rank: isRoyal ? 'Royal Flush' : 'Straight Flush', value: handRankConfig[isRoyal ? 'Royal Flush' : 'Straight Flush'].value, hand };
+            const isRoyal = handValues[0] === rankToValue('A') && handValues[4] === rankToValue('10');
+            return { rank: isRoyal ? 'Royal Flush' : 'Straight Flush', value: handRankConfig[isRoyal ? 'Royal Flush' : 'Straight Flush'].value, hand, tieBreakerRanks: [getStraightHighCard()] };
         }
+        if (fours.length > 0) return { rank: 'Four of a Kind', value: handRankConfig['Four of a Kind'].value, hand, tieBreakerRanks: [fours[0], ...kickers(fours)] };
+        if (threes.length > 0 && pairs.length > 0) return { rank: 'Full House', value: handRankConfig['Full House'].value, hand, tieBreakerRanks: [threes[0], pairs[0]] };
+        if (isFlush) return { rank: 'Flush', value: handRankConfig['Flush'].value, hand, tieBreakerRanks: handValues };
+        if (isStraight) return { rank: 'Straight', value: handRankConfig['Straight'].value, hand, tieBreakerRanks: [getStraightHighCard()] };
+        if (threes.length > 0) return { rank: 'Three of a Kind', value: handRankConfig['Three of a Kind'].value, hand, tieBreakerRanks: [threes[0], ...kickers(threes)] };
+        if (pairs.length === 2) return { rank: 'Two Pair', value: handRankConfig['Two Pair'].value, hand, tieBreakerRanks: [pairs[0], pairs[1], ...kickers(pairs)] };
+        if (pairs.length === 1) return { rank: 'One Pair', value: handRankConfig['One Pair'].value, hand, tieBreakerRanks: [pairs[0], ...kickers(pairs)] };
 
-        const counts = Object.values(rankCounts);
-        if (counts.some(c => c === 4)) return { rank: 'Four of a Kind', value: handRankConfig['Four of a Kind'].value, hand };
-        if (counts.some(c => c === 3) && counts.some(c => c === 2)) return { rank: 'Full House', value: handRankConfig['Full House'].value, hand };
-        if (isFlush) return { rank: 'Flush', value: handRankConfig['Flush'].value, hand };
-        if (isStraight) return { rank: 'Straight', value: handRankConfig['Straight'].value, hand };
-        if (counts.some(c => c === 3)) return { rank: 'Three of a Kind', value: handRankConfig['Three of a Kind'].value, hand };
-        if (counts.filter(c => c === 2).length === 2) return { rank: 'Two Pair', value: handRankConfig['Two Pair'].value, hand };
-        if (counts.filter(c => c === 2).length === 1) return { rank: 'One Pair', value: handRankConfig['One Pair'].value, hand };
-
-        return { rank: 'High Card', value: handRankConfig['High Card'].value, hand };
+        return { rank: 'High Card', value: handRankConfig['High Card'].value, hand, tieBreakerRanks: handValues };
     };
 
     const handleDeal = () => {
@@ -239,8 +241,23 @@ export default function PokerCard() {
             } else if (pResult.value < dResult.value) {
                 finalWinner = 'Dealer';
             } else {
-                // TODO: Tie-breaker logic for high card etc. For now, push on equal ranks.
-                finalWinner = 'Push';
+                // Tie-breaker logic
+                let tieBroken = false;
+                for (let i = 0; i < pResult.tieBreakerRanks.length; i++) {
+                    if (pResult.tieBreakerRanks[i] > dResult.tieBreakerRanks[i]) {
+                        finalWinner = 'Player';
+                        tieBroken = true;
+                        break;
+                    }
+                    if (pResult.tieBreakerRanks[i] < dResult.tieBreakerRanks[i]) {
+                        finalWinner = 'Dealer';
+                        tieBroken = true;
+                        break;
+                    }
+                }
+                if (!tieBroken) {
+                    finalWinner = 'Push';
+                }
             }
             setWinner(finalWinner);
             
