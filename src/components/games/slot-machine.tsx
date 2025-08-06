@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Coins, Star, Gem, Bell, Cherry, Award, Clover } from 'lucide-react';
+import { Coins, Star, Diamond, Bell, Cherry, Award, Clover } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,7 +12,7 @@ const symbols = [
   { icon: <Cherry className="h-16 w-16 text-red-500" />, value: 'cherry' },
   { icon: <Bell className="h-16 w-16 text-yellow-400" />, value: 'bell' },
   { icon: <Clover className="h-16 w-16 text-green-500" />, value: 'clover' },
-  { icon: <Gem className="h-16 w-16 text-blue-500" />, value: 'gem' },
+  { icon: <Diamond className="h-16 w-16 text-blue-500" />, value: 'diamond' },
   { icon: <Star className="h-16 w-16 text-yellow-300" />, value: 'star' },
   { icon: <Award className="h-16 w-16 text-primary" />, value: 'seven' },
 ];
@@ -88,7 +88,7 @@ export default function SlotMachine() {
             case 'cherry': winAmount = 10; break;
             case 'bell': winAmount = 20; break;
             case 'clover': winAmount = 50; break;
-            case 'gem': winAmount = 100; break;
+            case 'diamond': winAmount = 100; break;
             case 'star': winAmount = 200; break;
             case 'seven': winAmount = 500; break;
         }

@@ -16,10 +16,10 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
-import { Gem, Spade, Heart, Dice5, Apple, Award } from "lucide-react";
+import { Diamond, Spade, Heart, Dice5, Apple, Award } from "lucide-react";
 
 const menuItems = [
-  { href: "/", label: "Slot Machine", icon: Gem },
+  { href: "/", label: "Slot Machine", icon: Diamond },
   { href: "/blackjack", label: "Blackjack", icon: Spade },
   { href: "/poker", label: "Poker", icon: Heart },
   { href: "/dice-roller", label: "Dice Roller", icon: Dice5 },
