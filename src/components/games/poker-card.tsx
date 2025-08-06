@@ -19,7 +19,7 @@ interface CardType {
 }
 
 const suits: Suit[] = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
-const ranks: Rank[] = ['2', '3', '4', '5' | '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+const ranks: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
 const PlayingCard = ({ card, isSelected, onClick, hidden }: { card: CardType, isSelected?: boolean, onClick?: () => void, hidden?: boolean }) => {
     const suitIcons = {
@@ -111,7 +111,7 @@ export default function PokerCard() {
         });
 
         const sortedRanks = hand.map(c => ranks.indexOf(c.rank)).sort((a,b) => a - b);
-        const isFlush = Object.values(suitCounts).some(count => count === 5);
+        const isFlush = hand.every(card => card.suit === hand[0].suit);
         
         const isStraight = (() => {
             const uniqueRanks = [...new Set(sortedRanks)];
@@ -360,5 +360,3 @@ export default function PokerCard() {
         </Card>
     );
 }
-
-    
