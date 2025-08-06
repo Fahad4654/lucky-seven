@@ -51,7 +51,7 @@ export default function FortuneAppleCard() {
             <CardContent className="flex flex-col items-center justify-center space-y-6">
                 <div className="relative w-full max-w-sm aspect-square">
                     <Image 
-                        src="https://placehold.co/600x600.png"
+                        src="https://placehold.co/600.png"
                         alt="A shiny red apple"
                         fill
                         className={`rounded-full object-cover transition-all duration-500 ${gameState === 'loading' ? 'animate-pulse' : ''}`}
