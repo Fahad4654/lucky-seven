@@ -109,7 +109,7 @@ export default function DiceRollerCard() {
                 <CardDescription className="font-body">Bet High, Low, or Exactly 11 and roll the dice!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="num-dice">Number of Dice</Label>
                         <Input 
@@ -118,16 +118,6 @@ export default function DiceRollerCard() {
                             value={numDice} 
                             onChange={(e) => setNumDice(Math.max(3, parseInt(e.target.value)))}
                             min="3"
-                        />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="bet-amount">Bet Amount</Label>
-                        <Input 
-                            id="bet-amount" 
-                            type="number" 
-                            value={betAmount} 
-                            onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
-                            min="1"
                         />
                     </div>
                 </div>
@@ -146,6 +136,17 @@ export default function DiceRollerCard() {
                         <Label htmlFor="high" className="text-lg">High (&gt; 11)</Label>
                     </div>
                 </RadioGroup>
+
+                <div className="space-y-2">
+                    <Label htmlFor="bet-amount">Bet Amount</Label>
+                    <Input 
+                        id="bet-amount" 
+                        type="number" 
+                        value={betAmount} 
+                        onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                        min="1"
+                    />
+                </div>
 
                 <Button onClick={handleRoll} className="w-full text-lg font-headline bg-accent hover:bg-accent/90">
                     Roll Dice
