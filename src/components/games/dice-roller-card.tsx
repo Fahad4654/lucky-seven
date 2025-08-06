@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const diceIcons = [
     <Dice1 key="1" className="w-12 h-12" />,
@@ -22,6 +23,7 @@ export default function DiceRollerCard() {
     const [numSides, setNumSides] = useState(6);
     const [results, setResults] = useState<number[]>([]);
     const [total, setTotal] = useState<number | null>(null);
+    const [winStatus, setWinStatus] = useState<'win' | 'loss' | null>(null);
 
     const handleRoll = () => {
         const newResults = [];
@@ -33,6 +35,13 @@ export default function DiceRollerCard() {
         }
         setResults(newResults);
         setTotal(newTotal);
+
+        // Win condition: all dice are the same
+        if (newResults.length > 1 && newResults.every(val => val === newResults[0])) {
+            setWinStatus('win');
+        } else {
+            setWinStatus('loss');
+        }
     };
 
     const getDieIcon = (result: number) => {
@@ -49,7 +58,7 @@ export default function DiceRollerCard() {
                     <Dices className="w-10 h-10" />
                     Dice Roller
                 </CardTitle>
-                <CardDescription className="font-body">Roll the dice and test your luck.</CardDescription>
+                <CardDescription className="font-body">Roll all dice with the same number to win.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -81,6 +90,16 @@ export default function DiceRollerCard() {
                 
                 {results.length > 0 && (
                     <div className="pt-4 border-t">
+                         {winStatus && (
+                             <div className="text-center p-4 rounded-lg bg-background/50 w-full mb-4">
+                                <h3 className={cn(
+                                    "text-3xl font-bold font-headline",
+                                    winStatus === 'win' ? 'text-green-400' : 'text-red-500'
+                                )}>
+                                   {winStatus === 'win' ? 'You Win!' : 'Try Again!'}
+                                </h3>
+                            </div>
+                        )}
                         <h3 className="text-center font-headline text-2xl mb-4">Results</h3>
                         <div className="flex flex-wrap gap-4 justify-center mb-4">
                             {results.map((result, index) => (
