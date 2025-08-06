@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -5,7 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Dice5, Dices } from "lucide-react";
+import { Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from "lucide-react";
+
+const diceIcons = [
+    <Dice1 key="1" className="w-12 h-12" />,
+    <Dice2 key="2" className="w-12 h-12" />,
+    <Dice3 key="3" className="w-12 h-12" />,
+    <Dice4 key="4" className="w-12 h-12" />,
+    <Dice5 key="5" className="w-12 h-12" />,
+    <Dice6 key="6" className="w-12 h-12" />,
+];
 
 export default function DiceRollerCard() {
     const [numDice, setNumDice] = useState(2);
@@ -24,6 +34,13 @@ export default function DiceRollerCard() {
         setResults(newResults);
         setTotal(newTotal);
     };
+
+    const getDieIcon = (result: number) => {
+        if (result >= 1 && result <= 6) {
+            return diceIcons[result - 1];
+        }
+        return <Dice5 className="w-12 h-12" />; // Fallback for dice with more than 6 sides
+    }
 
     return (
         <Card className="w-full max-w-md mx-auto">
@@ -68,7 +85,7 @@ export default function DiceRollerCard() {
                         <div className="flex flex-wrap gap-4 justify-center mb-4">
                             {results.map((result, index) => (
                                 <div key={index} className="flex items-center justify-center flex-col text-primary">
-                                    <Dice5 className="w-12 h-12" />
+                                    {getDieIcon(result)}
                                     <span className="text-2xl font-bold">{result}</span>
                                 </div>
                             ))}
