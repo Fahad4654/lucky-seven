@@ -10,6 +10,7 @@ import { Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { useCredits } from "@/context/credits-context";
 
 const diceIcons = [
     <Dice1 key="1" className="w-12 h-12" />,
@@ -27,6 +28,8 @@ export default function DiceRollerCard() {
     const [total, setTotal] = useState<number | null>(null);
     const [winStatus, setWinStatus] = useState<'win' | 'loss' | null>(null);
     const [betType, setBetType] = useState<'high' | 'low' | 'eleven' | null>(null);
+    const [betAmount, setBetAmount] = useState(10);
+    const { credits, setCredits } = useCredits();
     const { toast } = useToast();
 
     const handleRoll = () => {
@@ -39,6 +42,17 @@ export default function DiceRollerCard() {
             return;
         }
 
+        if (credits < betAmount) {
+            toast({
+                title: "Insufficient Credits",
+                description: `You need at least ${betAmount} credits to play.`,
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setCredits(c => c - betAmount);
+        
         const newResults = [];
         let newTotal = 0;
         for (let i = 0; i < numDice; i++) {
@@ -50,22 +64,39 @@ export default function DiceRollerCard() {
         setTotal(newTotal);
 
         let win = false;
+        let payoutMultiplier = 1;
         if (betType === 'high') {
             win = newTotal > 11;
         } else if (betType === 'low') {
             win = newTotal < 11;
         } else if (betType === 'eleven') {
             win = newTotal === 11;
+            payoutMultiplier = 5; // Higher payout for specific number
         }
         
-        setWinStatus(win ? 'win' : 'loss');
+        if(win) {
+            const winnings = betAmount * payoutMultiplier;
+            setCredits(c => c + winnings);
+            setWinStatus('win');
+            toast({
+                title: "You Win!",
+                description: `You won ${winnings} credits!`,
+            });
+        } else {
+            setWinStatus('loss');
+            toast({
+                title: "You Lose!",
+                description: `You lost ${betAmount} credits.`,
+                variant: "destructive",
+            });
+        }
     };
 
     const getDieIcon = (result: number) => {
         if (result >= 1 && result <= 6) {
             return diceIcons[result - 1];
         }
-        return <Dice5 className="w-12 h-12" />; // Fallback for dice with more than 6 sides
+        return <Dice5 className="w-12 h-12" />; // Fallback
     }
 
     return (
@@ -78,15 +109,27 @@ export default function DiceRollerCard() {
                 <CardDescription className="font-body">Bet High, Low, or Exactly 11 and roll the dice!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="space-y-2">
-                    <Label htmlFor="num-dice">Number of Dice</Label>
-                    <Input 
-                        id="num-dice" 
-                        type="number" 
-                        value={numDice} 
-                        onChange={(e) => setNumDice(Math.max(3, parseInt(e.target.value)))}
-                        min="3"
-                    />
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="num-dice">Number of Dice</Label>
+                        <Input 
+                            id="num-dice" 
+                            type="number" 
+                            value={numDice} 
+                            onChange={(e) => setNumDice(Math.max(3, parseInt(e.target.value)))}
+                            min="3"
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="bet-amount">Bet Amount</Label>
+                        <Input 
+                            id="bet-amount" 
+                            type="number" 
+                            value={betAmount} 
+                            onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                            min="1"
+                        />
+                    </div>
                 </div>
 
                 <RadioGroup onValueChange={(value) => setBetType(value as 'high' | 'low' | 'eleven')} className="flex justify-center gap-4">

@@ -9,10 +9,12 @@ import type { GenerateFortuneOutput } from "@/ai/schemas/fortune-schema";
 import { useToast } from "@/hooks/use-toast";
 import { Repeat } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
+import { useCredits } from "@/context/credits-context";
 
 export default function FortuneAppleCard() {
     const [gameState, setGameState] = useState<'ready' | 'loading' | 'revealed'>('ready');
     const [result, setResult] = useState<GenerateFortuneOutput | null>(null);
+    const { setCredits } = useCredits();
     const { toast } = useToast();
 
     const handlePlay = async () => {
@@ -21,6 +23,7 @@ export default function FortuneAppleCard() {
         try {
             const fortuneResult = await generateFortune();
             setResult(fortuneResult);
+            setCredits(c => c + fortuneResult.prize);
             setGameState('revealed');
             toast({
                 title: "Fortune Found!",

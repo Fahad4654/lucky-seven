@@ -3,8 +3,11 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Coins } from "lucide-react";
+import { useCredits } from "@/context/credits-context";
 
 export default function AppHeader() {
+  const { credits, setCredits } = useCredits();
+
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
       <div className="md:hidden">
@@ -17,10 +20,10 @@ export default function AppHeader() {
         <div className="flex items-center gap-2">
           <Coins className="h-6 w-6 text-primary" />
           <span className="font-headline text-xl font-bold text-primary">
-            1,000
+            {credits.toLocaleString()}
           </span>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={() => setCredits(c => c + 100)}>
           Add Funds
         </Button>
       </div>
