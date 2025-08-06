@@ -6,7 +6,6 @@
  * - GenerateFortuneOutput - The return type for the generateFortune function.
  */
 
-import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 export const GenerateFortuneOutputSchema = z.object({
@@ -15,27 +14,25 @@ export const GenerateFortuneOutputSchema = z.object({
 });
 export type GenerateFortuneOutput = z.infer<typeof GenerateFortuneOutputSchema>;
 
-const fortunePrompt = ai.definePrompt({
-  name: 'fortunePrompt',
-  output: {schema: GenerateFortuneOutputSchema},
-  prompt: `You are a mystical fortune teller inside a casino game. 
-Generate a unique, single-sentence fortune. 
-It can be funny, wise, or cryptic.
-Also, generate a small prize amount between 5 and 50 credits.
-`,
-});
-
-const generateFortuneFlow = ai.defineFlow(
-  {
-    name: 'generateFortuneFlow',
-    outputSchema: GenerateFortuneOutputSchema,
-  },
-  async () => {
-    const {output} = await fortunePrompt();
-    return output!;
-  }
-);
+const fortunes = [
+    "The early bird gets the worm, but the second mouse gets the cheese.",
+    "A journey of a thousand miles begins with a single step.",
+    "Your talents will be recognized and suitably rewarded.",
+    "You will receive a surprise gift.",
+    "A faithful friend is a strong defense.",
+    "You will conquer any obstacle to realize your goal.",
+    "An exciting opportunity lies ahead of you.",
+    "You are a person of culture and taste.",
+    "A new perspective will come with the new year.",
+    "You will travel to many exotic places in your lifetime."
+];
 
 export async function generateFortune(): Promise<GenerateFortuneOutput> {
-  return generateFortuneFlow();
+  const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+  const prize = Math.floor(Math.random() * 46) + 5; // 5 to 50
+  
+  return {
+    fortune,
+    prize,
+  };
 }
