@@ -23,28 +23,28 @@ const ranks: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', '
 
 const PlayingCard = ({ card, hidden }: { card: CardType, hidden?: boolean }) => {
     const suitIcons = {
-        Spades: <Spade className="h-5 w-5 fill-current" />,
-        Hearts: <Heart className="h-5 w-5 fill-current text-red-500" />,
-        Diamonds: <Diamond className="h-5 w-5 fill-current text-red-500" />,
-        Clubs: <Club className="h-5 w-5 fill-current" />,
+        Spades: <Spade className="h-4 w-4 md:h-5 md:w-5 fill-current" />,
+        Hearts: <Heart className="h-4 w-4 md:h-5 md:w-5 fill-current text-red-500" />,
+        Diamonds: <Diamond className="h-4 w-4 md:h-5 md:w-5 fill-current text-red-500" />,
+        Clubs: <Club className="h-4 w-4 md:h-5 md:w-5 fill-current" />,
     };
 
     if (hidden) {
         return (
-            <div className="w-24 h-36 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
-                <div className="w-20 h-32 bg-blue-500 rounded-md" />
+            <div className="w-16 h-24 md:w-24 md:h-36 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
+                <div className="w-14 h-20 md:w-20 md:h-32 bg-blue-500 rounded-md" />
             </div>
         );
     }
     
     return (
-        <Card className="w-24 h-36 p-2 flex flex-col justify-between items-center bg-white text-black shadow-lg">
+        <Card className="w-16 h-24 md:w-24 md:h-36 p-1 md:p-2 flex flex-col justify-between items-center bg-white text-black shadow-lg">
             <div className="self-start">
-                <p className="font-bold text-xl">{card.rank}</p>
+                <p className="font-bold text-lg md:text-xl">{card.rank}</p>
                 {suitIcons[card.suit]}
             </div>
             <div className="transform rotate-180 self-end">
-                <p className="font-bold text-xl">{card.rank}</p>
+                <p className="font-bold text-lg md:text-xl">{card.rank}</p>
                 {suitIcons[card.suit]}
             </div>
         </Card>
@@ -218,17 +218,17 @@ export default function BlackjackCard() {
     return (
         <Card className="w-full max-w-4xl mx-auto">
             <CardHeader>
-                <CardTitle className="font-headline text-4xl text-primary">Blackjack</CardTitle>
+                <CardTitle className="font-headline text-3xl md:text-4xl text-primary">Blackjack</CardTitle>
                 <CardDescription className="font-body">Get closer to 21 than the dealer to win!</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
+            <CardContent className="space-y-6 md:space-y-8">
                 {/* Dealer's Hand */}
-                <div className="space-y-4">
-                    <h3 className="text-2xl font-headline flex items-center gap-2">
+                <div className="space-y-2">
+                    <h3 className="text-xl md:text-2xl font-headline flex items-center gap-2">
                         <Bot /> Dealer's Hand ({gameState === 'playerTurn' || gameState === 'betting' ? '?' : dealerScore})
                     </h3>
-                    <div className="flex space-x-2 h-40 items-center">
-                        {dealerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-24 h-36 bg-muted rounded-lg" />)}
+                    <div className="flex flex-wrap gap-2 min-h-[104px] md:min-h-[152px] items-center">
+                        {dealerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-16 h-24 md:w-24 md:h-36 bg-muted rounded-lg" />)}
                         {dealerHand.map((card, index) => (
                             <PlayingCard key={index} card={card} hidden={(gameState === 'playerTurn' || gameState === 'betting') && index === 1} />
                         ))}
@@ -236,12 +236,12 @@ export default function BlackjackCard() {
                 </div>
 
                 {/* Player's Hand */}
-                <div className="space-y-4">
-                    <h3 className="text-2xl font-headline flex items-center gap-2">
+                <div className="space-y-2">
+                    <h3 className="text-xl md:text-2xl font-headline flex items-center gap-2">
                         <User /> Your Hand ({playerScore})
                     </h3>
-                    <div className="flex space-x-2 h-40 items-center">
-                        {playerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-24 h-36 bg-muted rounded-lg" />)}
+                    <div className="flex flex-wrap gap-2 min-h-[104px] md:min-h-[152px] items-center">
+                        {playerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-16 h-24 md:w-24 md:h-36 bg-muted rounded-lg" />)}
                         {playerHand.map((card, index) => (
                             <PlayingCard key={index} card={card} />
                         ))}
@@ -267,9 +267,9 @@ export default function BlackjackCard() {
                     </div>
                 )}
                 {gameState === 'playerTurn' && (
-                    <div className="flex space-x-4">
-                        <Button onClick={playerHit} className="w-32 text-lg font-headline">Hit</Button>
-                        <Button onClick={playerStand} variant="outline" className="w-32 text-lg font-headline">Stand</Button>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+                        <Button onClick={playerHit} className="w-full sm:w-32 text-lg font-headline">Hit</Button>
+                        <Button onClick={playerStand} variant="outline" className="w-full sm:w-32 text-lg font-headline">Stand</Button>
                     </div>
                 )}
                  {gameState === 'gameOver' && (

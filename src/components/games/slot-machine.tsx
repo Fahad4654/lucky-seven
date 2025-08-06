@@ -12,15 +12,15 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
 const symbols = [
-  { icon: <Cherry className="h-16 w-16 text-red-500" />, value: 'cherry', multiplier: 5 },
-  { icon: <Bell className="h-16 w-16 text-yellow-400" />, value: 'bell', multiplier: 10 },
-  { icon: <Clover className="h-16 w-16 text-green-500" />, value: 'clover', multiplier: 20 },
-  { icon: <Diamond className="h-16 w-16 text-blue-500" />, value: 'diamond', multiplier: 50 },
-  { icon: <Star className="h-16 w-16 text-yellow-300" />, value: 'star', multiplier: 100 },
-  { icon: <Award className="h-16 w-16 text-primary" />, value: 'seven', multiplier: 250 },
+  { icon: (className: string) => <Cherry className={cn("text-red-500", className)} />, value: 'cherry', multiplier: 5 },
+  { icon: (className: string) => <Bell className={cn("text-yellow-400", className)} />, value: 'bell', multiplier: 10 },
+  { icon: (className: string) => <Clover className={cn("text-green-500", className)} />, value: 'clover', multiplier: 20 },
+  { icon: (className: string) => <Diamond className={cn("text-blue-500", className)} />, value: 'diamond', multiplier: 50 },
+  { icon: (className: string) => <Star className={cn("text-yellow-300", className)} />, value: 'star', multiplier: 100 },
+  { icon: (className: string) => <Award className={cn("text-primary", className)} />, value: 'seven', multiplier: 250 },
 ];
 
-const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: React.ReactNode, value: string}[], startSpinning: boolean, reelIndex: number }) => {
+const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: (className: string) => React.ReactNode, value: string}[], startSpinning: boolean, reelIndex: number }) => {
     const [localSymbols, setLocalSymbols] = useState(symbols);
     const [isSpinning, setIsSpinning] = useState(false);
 
@@ -44,29 +44,29 @@ const Reel = ({ symbols, startSpinning, reelIndex }: { symbols: {icon: React.Rea
     }, [startSpinning, reelIndex, symbols]);
 
     return (
-        <div className="h-48 w-32 bg-background/50 rounded-lg overflow-hidden relative border-2 border-primary/50 shadow-inner">
+        <div className="h-28 w-20 md:h-48 md:w-32 bg-background/50 rounded-lg overflow-hidden relative border-2 border-primary/50 shadow-inner">
              <div 
                 className={cn(
                     "flex flex-col items-center justify-start transition-transform duration-100 ease-linear",
                      isSpinning ? 'animate-none' : 'transform-none'
                 )}
-                style={{ transform: isSpinning ? `translateY(-${(localSymbols.length - 1) * 12}rem)`: 'translateY(0)'}}
+                style={{ transform: isSpinning ? `translateY(-${(localSymbols.length - 1) * 7}rem)`: 'translateY(0)'}}
              >
                 {[...localSymbols, ...localSymbols].map((symbol, index) => (
-                    <div key={index} className="h-48 w-full flex items-center justify-center shrink-0">
-                        {symbol.icon}
+                    <div key={index} className="h-28 md:h-48 w-full flex items-center justify-center shrink-0">
+                        {symbol.icon("h-12 w-12 md:h-16 md:w-16")}
                     </div>
                 ))}
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none" />
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-48 border-y-4 border-primary/70 pointer-events-none" />
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-28 md:h-48 border-y-2 md:border-y-4 border-primary/70 pointer-events-none" />
         </div>
     );
 };
 
 
 export default function SlotMachine() {
-    const [reels, setReels] = useState< {icon: React.ReactNode, value: string, multiplier: number}[][]>([]);
+    const [reels, setReels] = useState< {icon: (className: string) => React.ReactNode, value: string, multiplier: number}[][]>([]);
     const [spinning, setSpinning] = useState(false);
     const { credits, setCredits } = useCredits();
     const [betAmount, setBetAmount] = useState(10);
@@ -82,7 +82,7 @@ export default function SlotMachine() {
       ]);
     }, []);
 
-    const checkWin = (finalReels: {icon: React.ReactNode, value: string, multiplier: number}[][]) => {
+    const checkWin = (finalReels: {icon: (className: string) => React.ReactNode, value: string, multiplier: number}[][]) => {
       const line = [finalReels[0][0], finalReels[1][0], finalReels[2][0]];
       const isWin = line.every(symbol => symbol.value === line[0].value);
       
@@ -135,27 +135,27 @@ export default function SlotMachine() {
 
     return (
         <Card className="w-full max-w-3xl bg-card/80 border-2 border-primary/50 shadow-2xl shadow-primary/20">
-            <CardContent className="p-6 md:p-10">
-                <div className="flex justify-center items-center gap-4 md:gap-8 mb-8">
+            <CardContent className="p-4 md:p-10">
+                <div className="flex justify-center items-center gap-2 md:gap-8 mb-6 md:mb-8">
                     {reels.map((reelSymbols, i) => (
                         <Reel key={i} symbols={reelSymbols} startSpinning={spinning} reelIndex={i} />
                     ))}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-center">
-                    <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
+                    <div className="bg-background/50 p-3 md:p-4 rounded-lg border border-primary/30">
                         <p className="text-sm font-body text-muted-foreground">Balance</p>
-                        <p className="text-2xl font-headline text-primary font-bold">{credits.toLocaleString()}</p>
+                        <p className="text-xl md:text-2xl font-headline text-primary font-bold">{credits.toLocaleString()}</p>
                     </div>
-                    <div className="bg-background/50 p-4 rounded-lg border border-primary/30">
+                    <div className="bg-background/50 p-3 md:p-4 rounded-lg border border-primary/30">
                         <p className="text-sm font-body text-muted-foreground">Last Win</p>
-                        <p className={cn("text-2xl font-headline font-bold", lastWin && lastWin > 0 ? "text-green-400" : "text-primary")}>
+                        <p className={cn("text-xl md:text-2xl font-headline font-bold", lastWin && lastWin > 0 ? "text-green-400" : "text-primary")}>
                             {lastWin !== null ? lastWin.toLocaleString() : '-'}
                         </p>
                     </div>
                 </div>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-6 md:mb-8">
                      <div className="space-y-2">
                         <Label htmlFor="bet-amount" className="text-center block">Bet Amount</Label>
                         <Input 
@@ -172,7 +172,7 @@ export default function SlotMachine() {
                 <Button 
                     onClick={handleSpin} 
                     disabled={spinning}
-                    className="w-full h-16 text-2xl font-headline tracking-widest bg-accent hover:bg-accent/90 text-accent-foreground"
+                    className="w-full h-14 md:h-16 text-xl md:text-2xl font-headline tracking-widest bg-accent hover:bg-accent/90 text-accent-foreground"
                     size="lg"
                 >
                     {spinning ? 'SPINNING...' : `SPIN FOR ${betAmount.toLocaleString()}`}
