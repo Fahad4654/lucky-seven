@@ -236,10 +236,7 @@ export default function PokerCard() {
                 });
             }
         }
-    }, [gameState, playerHand, determineWinner, betAmount, setCredits, toast]);
-
-    const determineWinner = useCallback(() => {}, []);
-
+    }, [gameState, playerHand, betAmount, setCredits, toast]);
 
     return (
         <Card className="w-full max-w-4xl mx-auto">
