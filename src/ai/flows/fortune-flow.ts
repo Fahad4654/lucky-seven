@@ -3,16 +3,9 @@
  * @fileOverview A flow for generating a fortune.
  *
  * - generateFortune - A function that generates a random fortune and a small prize.
- * - GenerateFortuneOutput - The return type for the generateFortune function.
  */
 
-import {z} from 'zod';
-
-export const GenerateFortuneOutputSchema = z.object({
-  fortune: z.string().describe('A short, witty, or thoughtful fortune cookie-style message.'),
-  prize: z.number().describe('A small prize amount, from 5 to 50 credits.'),
-});
-export type GenerateFortuneOutput = z.infer<typeof GenerateFortuneOutputSchema>;
+import type { GenerateFortuneOutput } from "@/ai/schemas/fortune-schema";
 
 const fortunes = [
     "The early bird gets the worm, but the second mouse gets the cheese.",
