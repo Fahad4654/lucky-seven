@@ -26,14 +26,14 @@ export default function DiceRollerCard() {
     const [results, setResults] = useState<number[]>([]);
     const [total, setTotal] = useState<number | null>(null);
     const [winStatus, setWinStatus] = useState<'win' | 'loss' | null>(null);
-    const [betType, setBetType] = useState<'high' | 'low' | null>(null);
+    const [betType, setBetType] = useState<'high' | 'low' | 'eleven' | null>(null);
     const { toast } = useToast();
 
     const handleRoll = () => {
         if (!betType) {
             toast({
                 title: "No Bet Placed",
-                description: "Please select 'High' or 'Low' before rolling.",
+                description: "Please select 'High', 'Low', or 'Exactly 11' before rolling.",
                 variant: "destructive",
             });
             return;
@@ -51,9 +51,11 @@ export default function DiceRollerCard() {
 
         let win = false;
         if (betType === 'high') {
-            win = newTotal >= 11;
+            win = newTotal > 11;
         } else if (betType === 'low') {
             win = newTotal < 11;
+        } else if (betType === 'eleven') {
+            win = newTotal === 11;
         }
         
         setWinStatus(win ? 'win' : 'loss');
@@ -73,7 +75,7 @@ export default function DiceRollerCard() {
                     <Dices className="w-10 h-10" />
                     Dice Roller
                 </CardTitle>
-                <CardDescription className="font-body">Bet High (11+) or Low (&lt;11) and roll the dice!</CardDescription>
+                <CardDescription className="font-body">Bet High, Low, or Exactly 11 and roll the dice!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-2">
@@ -87,14 +89,18 @@ export default function DiceRollerCard() {
                     />
                 </div>
 
-                <RadioGroup onValueChange={(value) => setBetType(value as 'high' | 'low')} className="flex justify-center gap-4">
+                <RadioGroup onValueChange={(value) => setBetType(value as 'high' | 'low' | 'eleven')} className="flex justify-center gap-4">
                     <div className="flex items-center space-x-2">
                         <RadioGroupItem value="low" id="low" />
                         <Label htmlFor="low" className="text-lg">Low (&lt; 11)</Label>
                     </div>
+                     <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="eleven" id="eleven" />
+                        <Label htmlFor="eleven" className="text-lg">Exactly 11</Label>
+                    </div>
                     <div className="flex items-center space-x-2">
                         <RadioGroupItem value="high" id="high" />
-                        <Label htmlFor="high" className="text-lg">High (11+)</Label>
+                        <Label htmlFor="high" className="text-lg">High (&gt; 11)</Label>
                     </div>
                 </RadioGroup>
 
