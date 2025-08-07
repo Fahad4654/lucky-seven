@@ -31,7 +31,7 @@ const levelMultipliers: { [key: number]: number } = {
 
 interface Level {
     apples: { state: 'hidden' | 'good' | 'bad' }[];
-    badAppleIndex: number;
+    badAppleIndices: number[];
 }
 
 export default function FortuneAppleCard() {
@@ -44,10 +44,17 @@ export default function FortuneAppleCard() {
     const [potentialWinnings, setPotentialWinnings] = useState(0);
 
     const generateLevels = () => {
-        const newLevels = Array.from({ length: TOTAL_LEVELS }, () => ({
-            apples: Array.from({ length: APPLES_PER_LEVEL }, () => ({ state: 'hidden' as 'hidden' })),
-            badAppleIndex: Math.floor(Math.random() * APPLES_PER_LEVEL),
-        }));
+        const newLevels = Array.from({ length: TOTAL_LEVELS }, (_, levelIndex) => {
+            const badAppleCount = Math.floor(Math.random() * 4) + 1; // 1 to 4 bad apples
+            const badAppleIndices = new Set<number>();
+            while (badAppleIndices.size < badAppleCount) {
+                badAppleIndices.add(Math.floor(Math.random() * APPLES_PER_LEVEL));
+            }
+            return {
+                apples: Array.from({ length: APPLES_PER_LEVEL }, () => ({ state: 'hidden' as 'hidden' })),
+                badAppleIndices: Array.from(badAppleIndices),
+            };
+        });
         setLevels(newLevels);
     };
 
@@ -74,13 +81,11 @@ export default function FortuneAppleCard() {
         const newLevels = [...levels];
         const pickedLevel = newLevels[levelIndex];
 
-        if (appleIndex === pickedLevel.badAppleIndex) {
+        if (pickedLevel.badAppleIndices.includes(appleIndex)) {
             // Picked bad apple
             pickedLevel.apples.forEach((apple, i) => {
-                apple.state = i === pickedLevel.badAppleIndex ? 'bad' : 'good';
+                apple.state = pickedLevel.badAppleIndices.includes(i) ? 'bad' : 'good';
             });
-            // The picked apple is bad, but we want to show it as bad
-            pickedLevel.apples[appleIndex].state = 'bad';
             
             setGameState('gameOver');
             toast({
