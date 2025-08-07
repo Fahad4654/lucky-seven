@@ -28,9 +28,8 @@ const menuItems = [
 export default function AppSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
-
-  // Don't show sidebar on auth pages or if not logged in
-  if (pathname === '/login' || pathname === '/register' || !user) {
+  
+  if (!user) {
     return null;
   }
 

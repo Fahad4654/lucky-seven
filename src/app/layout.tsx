@@ -2,12 +2,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import AppSidebar from '@/components/layout/app-sidebar';
-import AppHeader from '@/components/layout/app-header';
 import { Toaster } from '@/components/ui/toaster';
-import { CreditsProvider } from '@/context/credits-context';
-import { AuthProvider } from '@/context/auth-context';
+import { Providers } from './providers';
+import AppLayout from '@/components/layout/app-layout';
 
 export const metadata: Metadata = {
   title: 'Lucky Sevens Casino',
@@ -27,22 +24,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased')}>
-        <AuthProvider>
-          <CreditsProvider>
-            <SidebarProvider>
-              <div className="flex min-h-screen w-full">
-                <AppSidebar />
-                <div className="flex flex-1 flex-col">
-                  <AppHeader />
-                  <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
-                    {children}
-                  </main>
-                </div>
-              </div>
-            </SidebarProvider>
-          </CreditsProvider>
-        </AuthProvider>
-        <Toaster />
+        <Providers>
+          <AppLayout>
+            {children}
+          </AppLayout>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

@@ -7,17 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Coins, LogOut, Home } from "lucide-react";
 import { useCredits } from "@/context/credits-context";
 import { useAuth } from "@/context/auth-context";
-import { usePathname } from 'next/navigation';
 
 export default function AppHeader() {
   const { credits, setCredits } = useCredits();
   const { user, logout } = useAuth();
-  const pathname = usePathname();
-
-  // Don't show the header on login/register pages
-  if (pathname === '/login' || pathname === '/register') {
-      return null;
-  }
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
