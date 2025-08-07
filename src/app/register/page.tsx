@@ -22,6 +22,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const { toast } = useToast();
     const router = useRouter();
 
@@ -54,9 +55,42 @@ export default function RegisterPage() {
             setPhoneNumberError('');
         }
     };
+    
+    const validatePassword = (password: string) => {
+        if (password.length < 8) {
+            return "Password must be at least 8 characters long.";
+        }
+        if (!/[a-z]/.test(password)) {
+            return "Password must contain a lowercase letter.";
+        }
+        if (!/[A-Z]/.test(password)) {
+            return "Password must contain an uppercase letter.";
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            return "Password must contain a special character.";
+        }
+        return "";
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        if (newPassword) {
+            setPasswordError(validatePassword(newPassword));
+        } else {
+            setPasswordError('');
+        }
+    };
+
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const currentPasswordError = validatePassword(password);
+        if (currentPasswordError) {
+            setPasswordError(currentPasswordError);
+            return;
+        }
 
         if (!validateEmail(email)) {
             setEmailError('Please enter a valid email address.');
@@ -66,10 +100,11 @@ export default function RegisterPage() {
             setPhoneNumberError('Phone number must be exactly 11 digits.');
             return;
         }
-        if (emailError || phoneNumberError) return;
+        if (emailError || phoneNumberError || passwordError) return;
 
         setEmailError('');
         setPhoneNumberError('');
+        setPasswordError('');
         setLoading(true);
 
         try {
@@ -158,11 +193,13 @@ export default function RegisterPage() {
                                 type="password"
                                 required
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={handlePasswordChange}
                                 disabled={loading}
+                                className={cn(passwordError && "border-destructive")}
                             />
+                            {passwordError && <p className="text-sm font-medium text-destructive">{passwordError}</p>}
                         </div>
-                        <Button type="submit" className="w-full font-headline" disabled={loading || !!emailError || !!phoneNumberError}>
+                        <Button type="submit" className="w-full font-headline" disabled={loading || !!emailError || !!phoneNumberError || !!passwordError}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? 'Creating Account...' : 'Create an account'}
                         </Button>
