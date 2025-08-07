@@ -122,7 +122,8 @@ export default function RegisterPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
+                // Now we throw an error with the specific message from the API
+                throw new Error(data.message || 'An unknown error occurred during registration.');
             }
 
             toast({
@@ -132,9 +133,10 @@ export default function RegisterPage() {
             router.push('/login');
 
         } catch (error: any) {
+            // The catch block will display the specific error message thrown above
             toast({
                 title: "Registration Failed",
-                description: error.message || "Please check your details and try again.",
+                description: error.message, // This now contains the specific API error
                 variant: "destructive",
             });
         } finally {
@@ -180,7 +182,7 @@ export default function RegisterPage() {
                             <Label htmlFor="phoneNumber">Phone Number</Label>
                             <Input
                                 id="phoneNumber"
-                                placeholder="01234567890"
+                                placeholder="01711223344"
                                 required
                                 value={phoneNumber}
                                 onChange={handlePhoneNumberChange}
