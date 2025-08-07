@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Spade, Heart, Diamond, Club, Repeat, User, Bot } from "lucide-react";
 import { useCredits } from "@/context/credits-context";
+import { cn } from "@/lib/utils";
 
 type Suit = 'Spades' | 'Hearts' | 'Diamonds' | 'Clubs';
 type Rank = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'A';
@@ -31,23 +32,27 @@ const PlayingCard = ({ card, isSelected, onClick, hidden }: { card: CardType, is
 
     if (hidden) {
          return (
-             <div className="w-14 h-20 md:w-24 md:h-36 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
-                <div className="w-12 h-18 md:w-20 md:h-32 bg-blue-500 rounded-md" />
+             <div className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
+                <div className="w-12 h-18 sm:w-14 sm:h-20 md:w-16 md:h-24 bg-blue-500 rounded-md" />
             </div>
         )
     }
     
     return (
         <Card 
-            className={`w-14 h-20 md:w-24 md:h-36 p-1 md:p-2 flex flex-col justify-between items-center bg-white text-black shadow-lg transition-all duration-200 ${onClick ? 'cursor-pointer' : ''} ${isSelected ? 'transform -translate-y-2 ring-2 md:ring-4 ring-primary' : (onClick ? 'hover:-translate-y-1' : '')}`}
+            className={cn(
+                "w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 p-1 flex flex-col justify-between items-center bg-white text-black shadow-lg transition-all duration-200",
+                onClick && "cursor-pointer",
+                isSelected ? "transform -translate-y-2 ring-2 md:ring-4 ring-primary" : (onClick ? "hover:-translate-y-1" : "")
+            )}
             onClick={onClick}
         >
             <div className="self-start">
-                <p className="font-bold text-base md:text-xl">{card.rank}</p>
+                <p className="font-bold text-sm sm:text-base md:text-lg">{card.rank}</p>
                 {suitIcons[card.suit]}
             </div>
             <div className="transform rotate-180 self-end">
-                <p className="font-bold text-base md:text-xl">{card.rank}</p>
+                <p className="font-bold text-sm sm:text-base md:text-lg">{card.rank}</p>
                 {suitIcons[card.suit]}
             </div>
         </Card>
@@ -297,14 +302,14 @@ export default function PokerCard() {
                 <CardTitle className="font-headline text-3xl md:text-4xl text-primary">Versus Poker</CardTitle>
                 <CardDescription className="font-body">Play against the dealer. Get a better hand to win.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 md:space-y-8 flex flex-col items-center">
+            <CardContent className="space-y-4 md:space-y-6 flex flex-col items-center">
                 <div className="space-y-2 w-full">
-                    <h3 className="text-xl md:text-2xl font-headline flex items-center justify-center gap-2">
+                    <h3 className="text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
                         <Bot /> Dealer's Hand
-                        {dealerHandResult && <span className="text-base md:text-lg text-primary font-body">({dealerHandResult.rank})</span>}
+                        {dealerHandResult && <span className="text-sm md:text-lg text-primary font-body">({dealerHandResult.rank})</span>}
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-1 md:gap-4 min-h-[88px] md:min-h-[152px] items-center">
-                        {dealerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 md:w-24 md:h-36 bg-muted rounded-lg" />)}
+                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center">
+                        {dealerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-muted rounded-lg" />)}
                         {dealerHand.map((card, index) => (
                             <PlayingCard 
                                 key={index} 
@@ -316,12 +321,12 @@ export default function PokerCard() {
                 </div>
 
                  <div className="space-y-2 w-full">
-                    <h3 className="text-xl md:text-2xl font-headline flex items-center justify-center gap-2">
+                    <h3 className="text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
                         <User /> Your Hand
-                        {playerHandResult && <span className="text-base md:text-lg text-primary font-body">({playerHandResult.rank})</span>}
+                        {playerHandResult && <span className="text-sm md:text-lg text-primary font-body">({playerHandResult.rank})</span>}
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-1 md:gap-4 min-h-[88px] md:min-h-[152px] items-center">
-                        {playerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 md:w-24 md:h-36 bg-muted rounded-lg" />)}
+                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center">
+                        {playerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-muted rounded-lg" />)}
                         {playerHand.map((card, index) => (
                             <PlayingCard 
                                 key={index} 
@@ -362,7 +367,7 @@ export default function PokerCard() {
                 )}
                  {gameState === 'showdown' && (
                     <div className="text-center p-4 rounded-lg bg-background/50 w-full">
-                        <h3 className="text-3xl font-bold font-headline mb-2">
+                        <h3 className="text-2xl md:text-3xl font-bold font-headline mb-2">
                            {winner === 'Player' && <span className="text-green-400">You Win!</span>}
                            {winner === 'Dealer' && <span className="text-red-500">Dealer Wins!</span>}
                            {winner === 'Push' && <span className="text-yellow-400">It's a Push!</span>}
