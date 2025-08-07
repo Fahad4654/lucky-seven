@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth();
+    const { login, loading } = useAuth();
     const { toast } = useToast();
     const router = useRouter();
 
@@ -23,13 +24,8 @@ export default function LoginPage() {
         if (success) {
             toast({ title: 'Login successful!' });
             router.push('/slot-machine'); // Redirect to a game page
-        } else {
-            toast({
-                title: 'Login failed',
-                description: 'Please check your credentials and try again.',
-                variant: 'destructive'
-            });
         }
+        // Error toast is handled in the auth context
     };
 
     return (
@@ -50,6 +46,7 @@ export default function LoginPage() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
                             />
                         </div>
                         <div className="grid gap-2">
@@ -62,10 +59,12 @@ export default function LoginPage() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
                             />
                         </div>
-                        <Button type="submit" className="w-full font-headline">
-                            Login
+                        <Button type="submit" className="w-full font-headline" disabled={loading}>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {loading ? 'Please wait' : 'Login'}
                         </Button>
                     </form>
                     <div className="mt-4 text-center text-sm">

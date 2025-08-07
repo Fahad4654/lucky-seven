@@ -2,11 +2,16 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
     id: string;
     email: string;
     name: string;
+    isAdmin: boolean;
+    phoneNumber: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface AuthContextType {
@@ -18,41 +23,66 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { toast } = useToast();
 
     useEffect(() => {
-        // Check for a logged-in user in local storage or a cookie
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.error("Failed to parse user from localStorage", error);
+            localStorage.removeItem('user');
         }
         setLoading(false);
     }, []);
 
     const login = async (email: string, pass: string) => {
-        // !! IMPORTANT !!
-        // This is a placeholder for your actual API call.
-        // Replace this with a fetch request to your login API.
-        console.log("Attempting login with:", email, pass);
-        
-        // --- REPLACE THIS BLOCK ---
-        if (email && pass) { // Basic check, replace with API call
-            const loggedInUser: User = { id: '1', email, name: 'Test User' };
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password: pass }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            const { user: loggedInUser, accessToken } = data;
+
             localStorage.setItem('user', JSON.stringify(loggedInUser));
+            localStorage.setItem('accessToken', accessToken);
             setUser(loggedInUser);
             router.push('/slot-machine');
             return true;
+        } catch (error: any) {
+            toast({
+                title: 'Login Failed',
+                description: error.message || 'An unexpected error occurred.',
+                variant: 'destructive',
+            });
+            return false;
+        } finally {
+            setLoading(false);
         }
-        // --- END REPLACE ---
-
-        return false;
     };
 
     const logout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
         setUser(null);
         router.push('/login');
     };
