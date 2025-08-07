@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -9,15 +10,26 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [emailError, setEmailError] = useState('');
     const { login, loading } = useAuth();
-    const router = useRouter();
+
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+        setEmailError('');
         await login(email, password);
     };
 
@@ -38,9 +50,14 @@ export default function LoginPage() {
                                 placeholder="m@example.com"
                                 required
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (emailError) setEmailError('');
+                                }}
                                 disabled={loading}
+                                className={cn(emailError && "border-destructive")}
                             />
+                             {emailError && <p className="text-sm font-medium text-destructive">{emailError}</p>}
                         </div>
                         <div className="grid gap-2">
                             <div className="flex items-center">

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
 
@@ -19,11 +20,23 @@ export default function RegisterPage() {
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
     const { toast } = useToast();
     const router = useRouter();
 
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+        setEmailError('');
         setLoading(true);
 
         try {
@@ -86,9 +99,14 @@ export default function RegisterPage() {
                                 placeholder="m@example.com"
                                 required
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (emailError) setEmailError('');
+                                }}
                                 disabled={loading}
+                                className={cn(emailError && "border-destructive")}
                             />
+                            {emailError && <p className="text-sm font-medium text-destructive">{emailError}</p>}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="phoneNumber">Phone Number</Label>
