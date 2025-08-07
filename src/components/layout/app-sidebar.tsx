@@ -16,24 +16,28 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
-import { Diamond, Spade, Heart, Dice5, Apple, Award } from "lucide-react";
+import { Home, User, Wallet } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const menuItems = [
-  { href: "/", label: "Slot Machine", icon: Diamond },
-  { href: "/blackjack", label: "Blackjack", icon: Spade },
-  { href: "/poker", label: "Poker", icon: Heart },
-  { href: "/dice-roller", label: "Dice Roller", icon: Dice5 },
-  { href: "/fortune-apple", label: "Fortune Apple", icon: Apple },
+  { href: "/home", label: "Home", icon: Home },
+  { href: "/profile", label: "Profile", icon: User },
+  { href: "/wallet", label: "Wallet", icon: Wallet },
 ];
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  
+  if (!user) {
+    return null;
+  }
 
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="p-4">
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-2 font-bold text-lg font-headline text-primary"
         >
           <Logo className="w-8 h-8" />
