@@ -3,21 +3,17 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
 
 export default function Home() {
   const router = useRouter();
-  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.replace('/home');
-      } else {
-        router.replace('/login');
-      }
-    }
-  }, [user, loading, router]);
+    // The middleware should handle the redirection.
+    // This is a fallback in case middleware is not configured for the root.
+    // For a better UX, we'll try to redirect immediately.
+    // A better approach is to ensure middleware covers the root path.
+    router.replace('/login');
+  }, [router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center">
