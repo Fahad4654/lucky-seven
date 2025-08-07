@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             localStorage.setItem('accessToken', accessToken);
             setUser(loggedInUser);
-            router.push('/slot-machine');
+            router.push('/home'); // Redirect to home page
             return true;
         } catch (error: any) {
             toast({
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 }

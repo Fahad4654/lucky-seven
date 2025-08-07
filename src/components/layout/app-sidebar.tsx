@@ -16,10 +16,11 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
-import { Diamond, Spade, Heart, Dice5, Apple } from "lucide-react";
+import { Diamond, Spade, Heart, Dice5, Apple, Home } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const menuItems = [
+  { href: "/home", label: "Home", icon: Home },
   { href: "/slot-machine", label: "Slot Machine", icon: Diamond },
   { href: "/blackjack", label: "Blackjack", icon: Spade },
   { href: "/poker", label: "Poker", icon: Heart },
@@ -31,15 +32,15 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (!user) {
-    return null; // Don't show sidebar if not logged in
+  if (!user || pathname === '/login' || pathname === '/register') {
+    return null; // Don't show sidebar if not logged in or on auth pages
   }
 
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="p-4">
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-2 font-bold text-lg font-headline text-primary"
         >
           <Logo className="w-8 h-8" />
