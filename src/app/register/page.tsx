@@ -21,6 +21,7 @@ export default function RegisterPage() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [loading, setLoading] = useState(false);
     const [emailError, setEmailError] = useState('');
+    const [phoneNumberError, setPhoneNumberError] = useState('');
     const { toast } = useToast();
     const router = useRouter();
 
@@ -38,6 +39,21 @@ export default function RegisterPage() {
             setEmailError('');
         }
     };
+    
+    const validatePhoneNumber = (phone: string) => {
+        const regex = /^\d{11}$/;
+        return regex.test(phone);
+    };
+
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPhoneNumber = e.target.value;
+        setPhoneNumber(newPhoneNumber);
+        if (newPhoneNumber && !validatePhoneNumber(newPhoneNumber)) {
+            setPhoneNumberError('Phone number must be exactly 11 digits.');
+        } else {
+            setPhoneNumberError('');
+        }
+    };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,9 +62,14 @@ export default function RegisterPage() {
             setEmailError('Please enter a valid email address.');
             return;
         }
-        if (emailError) return;
+        if (!validatePhoneNumber(phoneNumber)) {
+            setPhoneNumberError('Phone number must be exactly 11 digits.');
+            return;
+        }
+        if (emailError || phoneNumberError) return;
 
         setEmailError('');
+        setPhoneNumberError('');
         setLoading(true);
 
         try {
@@ -124,9 +145,11 @@ export default function RegisterPage() {
                                 placeholder="01234567890"
                                 required
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                onChange={handlePhoneNumberChange}
                                 disabled={loading}
+                                className={cn(phoneNumberError && "border-destructive")}
                             />
+                             {phoneNumberError && <p className="text-sm font-medium text-destructive">{phoneNumberError}</p>}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
@@ -139,7 +162,7 @@ export default function RegisterPage() {
                                 disabled={loading}
                             />
                         </div>
-                        <Button type="submit" className="w-full font-headline" disabled={loading || !!emailError}>
+                        <Button type="submit" className="w-full font-headline" disabled={loading || !!emailError || !!phoneNumberError}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? 'Creating Account...' : 'Create an account'}
                         </Button>
