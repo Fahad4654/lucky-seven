@@ -66,6 +66,9 @@ export default function RegisterPage() {
         if (!/[A-Z]/.test(password)) {
             return "Password must contain an uppercase letter.";
         }
+        if (!/\d/.test(password)) {
+            return "Password must contain a digit.";
+        }
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
             return "Password must contain a special character.";
         }
