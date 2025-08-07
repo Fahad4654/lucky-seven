@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { Providers } from './providers';
+import { Providers } from '@/app/providers';
 import AppLayout from '@/components/layout/app-layout';
 
 export const metadata: Metadata = {
