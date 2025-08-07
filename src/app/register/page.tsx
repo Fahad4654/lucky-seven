@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -8,37 +9,53 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+
+const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        // !! IMPORTANT !!
-        // This is a placeholder for your actual API call.
-        // Replace this with a fetch request to your registration API.
-        console.log("Registering with:", name, email, password);
-        
-        // --- REPLACE THIS BLOCK ---
-        if (email && password && name) { // Basic check, replace with API call
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password, phoneNumber }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Registration failed');
+            }
+
             toast({
                 title: "Registration Successful!",
                 description: "You can now log in with your credentials.",
             });
             router.push('/login');
-            return;
+
+        } catch (error: any) {
+            toast({
+                title: "Registration Failed",
+                description: error.message || "Please check your details and try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
         }
-        // --- END REPLACE ---
-        
-        toast({
-            title: "Registration Failed",
-            description: "Please fill out all fields and try again.",
-            variant: "destructive",
-        });
     };
 
     return (
@@ -58,6 +75,7 @@ export default function RegisterPage() {
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
+                                disabled={loading}
                             />
                         </div>
                         <div className="grid gap-2">
@@ -69,6 +87,18 @@ export default function RegisterPage() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="phoneNumber">Phone Number</Label>
+                            <Input
+                                id="phoneNumber"
+                                placeholder="01234567890"
+                                required
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                disabled={loading}
                             />
                         </div>
                         <div className="grid gap-2">
@@ -79,10 +109,12 @@ export default function RegisterPage() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
                             />
                         </div>
-                        <Button type="submit" className="w-full font-headline">
-                            Create an account
+                        <Button type="submit" className="w-full font-headline" disabled={loading}>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {loading ? 'Creating Account...' : 'Create an account'}
                         </Button>
                     </form>
                     <div className="mt-4 text-center text-sm">
