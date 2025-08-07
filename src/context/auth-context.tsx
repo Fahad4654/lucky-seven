@@ -21,6 +21,7 @@ interface AuthContextType {
     login: (email: string, pass: string) => Promise<boolean>;
     logout: () => void;
     loading: boolean;
+    initialLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,7 +30,8 @@ const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false); // For login/logout actions
+    const [initialLoading, setInitialLoading] = useState(true); // For initial page load
     const router = useRouter();
     const { toast } = useToast();
 
@@ -43,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error("Failed to parse user from localStorage", error);
             localStorage.removeItem('user');
         }
-        setLoading(false);
+        setInitialLoading(false);
     }, []);
 
     const login = async (email: string, pass: string) => {
@@ -114,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push('/login');
     };
 
-    if (loading) {
+    if (initialLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                  <Skeleton className="h-[450px] w-[400px]" />
@@ -124,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, initialLoading }}>
             {children}
         </AuthContext.Provider>
     );
