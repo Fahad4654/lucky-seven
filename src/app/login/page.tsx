@@ -22,6 +22,16 @@ export default function LoginPage() {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     };
+    
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newEmail = e.target.value;
+        setEmail(newEmail);
+        if (newEmail && !validateEmail(newEmail)) {
+            setEmailError('Please enter a valid email address.');
+        } else {
+            setEmailError('');
+        }
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,6 +39,8 @@ export default function LoginPage() {
             setEmailError('Please enter a valid email address.');
             return;
         }
+        if (emailError) return;
+        
         setEmailError('');
         await login(email, password);
     };
@@ -50,10 +62,7 @@ export default function LoginPage() {
                                 placeholder="m@example.com"
                                 required
                                 value={email}
-                                onChange={(e) => {
-                                    setEmail(e.target.value);
-                                    if (emailError) setEmailError('');
-                                }}
+                                onChange={handleEmailChange}
                                 disabled={loading}
                                 className={cn(emailError && "border-destructive")}
                             />
@@ -72,7 +81,7 @@ export default function LoginPage() {
                                 disabled={loading}
                             />
                         </div>
-                        <Button type="submit" className="w-full font-headline" disabled={loading}>
+                        <Button type="submit" className="w-full font-headline" disabled={loading || !!emailError}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? 'Please wait' : 'Login'}
                         </Button>
