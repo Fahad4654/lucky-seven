@@ -1,10 +1,10 @@
-
+// app/layout.tsx
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { Providers } from '@/app/providers';
-import AppLayout from '@/components/layout/app-layout';
+import { Providers } from './providers';
+import ClientWrapper from '@/components/layout/client-wrapper';
 
 export const metadata: Metadata = {
   title: 'Lucky Sevens Casino',
@@ -21,13 +21,16 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className={cn('font-body antialiased')}>
         <Providers>
-          <AppLayout>{children}</AppLayout>
-          <Toaster />
+          <ClientWrapper>{children}</ClientWrapper>
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

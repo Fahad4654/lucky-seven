@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Coins, LogOut, Home } from "lucide-react";
@@ -11,6 +12,12 @@ import { useAuth } from "@/context/auth-context";
 export default function AppHeader() {
   const { credits, setCredits } = useCredits();
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const isAuthPage = pathname === '/login' || pathname === '/register';
+
+  if (isAuthPage || !user) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
