@@ -170,29 +170,28 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="relative">
-                                         <div className="relative z-10 flex justify-around p-4">
-                                            {level.apples.map((apple, appleIndex) => (
-                                                <button 
-                                                    key={appleIndex} 
+                                    <div className="flex justify-around">
+                                        {level.apples.map((apple, appleIndex) => (
+                                            <div key={appleIndex} className="relative w-14 h-14 sm:w-16 sm:h-16 flex flex-col items-center justify-end">
+                                                <button
                                                     onClick={() => handleApplePick(levelIndex, appleIndex)}
                                                     disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
-                                                    className="disabled:cursor-not-allowed transition-transform hover:scale-110"
+                                                    className="relative z-10 disabled:cursor-not-allowed transition-transform hover:scale-110"
                                                 >
                                                     <Apple className={cn(
                                                         "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
                                                         apple.state === 'hidden' && 'text-yellow-900/50 opacity-50',
                                                         apple.state === 'good' && 'text-green-500',
                                                         apple.state === 'bad' && 'text-red-800 animate-pulse',
-                                                         (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
-                                                    )} 
+                                                        (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
+                                                    )}
                                                     />
                                                 </button>
-                                            ))}
-                                        </div>
-                                        <div className="absolute bottom-0 left-0 right-0 z-0">
-                                            <WickerBasket />
-                                        </div>
+                                                <div className="absolute bottom-[-10px] w-full z-0">
+                                                    <WickerBasket />
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                            )
@@ -242,4 +241,3 @@ export default function FortuneAppleCard() {
         </Card>
     );
 }
-
