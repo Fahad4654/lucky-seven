@@ -66,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             localStorage.setItem('accessToken', accessToken);
+            // Set a cookie for middleware to read
+            document.cookie = `user=true; path=/; max-age=${60 * 60 * 24 * 7}`;
             setUser(loggedInUser);
             router.push('/home'); // Redirect to home page
             return true;
@@ -84,6 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
+        // Clear the cookie
+        document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         setUser(null);
         router.push('/login');
     };
