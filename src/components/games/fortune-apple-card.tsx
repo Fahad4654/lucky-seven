@@ -34,23 +34,6 @@ interface Level {
     badAppleIndex: number;
 }
 
-const WickerBasket = () => (
-    <div className="relative w-full h-16 sm:h-20 -mt-8 sm:-mt-10">
-         <svg viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-lg absolute bottom-0">
-            {/* Basket Rim */}
-            <path d="M 5,10 C 5,5 10,5 15,5 L 85,5 C 90,5 95,5 95,10" fill="#a1662f" />
-            {/* Basket Body */}
-            <path d="M 5,10 L 15,35 C 15,40 20,40 25,40 L 75,40 C 80,40 85,40 85,35 L 95,10 Z" fill="#b97c45" />
-            {/* Weave Pattern */}
-            <g stroke="#885522" strokeWidth="0.5">
-                {Array.from({length: 10}).map((_, i) => <path key={`v-${i}`} d={`M ${15 + i*7},5 L ${25 + i*5}, 40`} />)}
-                {Array.from({length: 4}).map((_, i) => <path key={`h-${i}`} d={`M 5, ${15 + i*6} C 30,${12+i*6} 70,${12+i*6} 95,${15 + i*6}`} fill="none" />)}
-            </g>
-        </svg>
-    </div>
-)
-
-
 export default function FortuneAppleCard() {
     const [gameState, setGameState] = useState<'betting' | 'playing' | 'gameOver'>('betting');
     const [betAmount, setBetAmount] = useState(10);
@@ -170,27 +153,24 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="relative">
-                                        <div className="flex justify-around items-end h-16 sm:h-20 relative z-10">
-                                            {level.apples.map((apple, appleIndex) => (
-                                                <button
-                                                    key={appleIndex}
-                                                    onClick={() => handleApplePick(levelIndex, appleIndex)}
-                                                    disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
-                                                    className="disabled:cursor-not-allowed transition-transform hover:scale-110"
-                                                >
-                                                    <Apple className={cn(
-                                                        "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
-                                                        apple.state === 'hidden' && 'text-yellow-900/50 opacity-50',
-                                                        apple.state === 'good' && 'text-green-500',
-                                                        apple.state === 'bad' && 'text-red-800 animate-pulse',
-                                                        (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
-                                                    )}
-                                                    />
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <WickerBasket />
+                                    <div className="flex justify-around items-center h-16 sm:h-20">
+                                        {level.apples.map((apple, appleIndex) => (
+                                            <button
+                                                key={appleIndex}
+                                                onClick={() => handleApplePick(levelIndex, appleIndex)}
+                                                disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
+                                                className="disabled:cursor-not-allowed transition-transform hover:scale-110"
+                                            >
+                                                <Apple className={cn(
+                                                    "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
+                                                    apple.state === 'hidden' && 'text-yellow-900/50 opacity-50',
+                                                    apple.state === 'good' && 'text-green-500',
+                                                    apple.state === 'bad' && 'text-red-800 animate-pulse',
+                                                    (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
+                                                )}
+                                                />
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                            )
