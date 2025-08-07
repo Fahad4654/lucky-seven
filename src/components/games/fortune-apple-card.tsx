@@ -35,8 +35,8 @@ interface Level {
 }
 
 const WickerBasket = () => (
-    <div className="relative w-full">
-         <svg viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-lg">
+    <div className="relative w-full h-16 sm:h-20 -mt-8 sm:-mt-10">
+         <svg viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-lg absolute bottom-0">
             {/* Basket Rim */}
             <path d="M 5,10 C 5,5 10,5 15,5 L 85,5 C 90,5 95,5 95,10" fill="#a1662f" />
             {/* Basket Body */}
@@ -170,13 +170,14 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="flex justify-around">
-                                        {level.apples.map((apple, appleIndex) => (
-                                            <div key={appleIndex} className="relative w-14 h-14 sm:w-16 sm:h-16 flex flex-col items-center justify-end">
+                                    <div className="relative">
+                                        <div className="flex justify-around items-end h-16 sm:h-20 relative z-10">
+                                            {level.apples.map((apple, appleIndex) => (
                                                 <button
+                                                    key={appleIndex}
                                                     onClick={() => handleApplePick(levelIndex, appleIndex)}
                                                     disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
-                                                    className="relative z-10 disabled:cursor-not-allowed transition-transform hover:scale-110"
+                                                    className="disabled:cursor-not-allowed transition-transform hover:scale-110"
                                                 >
                                                     <Apple className={cn(
                                                         "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
@@ -187,11 +188,9 @@ export default function FortuneAppleCard() {
                                                     )}
                                                     />
                                                 </button>
-                                                <div className="absolute bottom-[-10px] w-full z-0">
-                                                    <WickerBasket />
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
+                                        <WickerBasket />
                                     </div>
                                 </div>
                            )
