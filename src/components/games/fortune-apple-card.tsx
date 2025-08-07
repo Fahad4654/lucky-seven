@@ -1,27 +1,70 @@
 
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { generateFortune } from "@/ai/flows/fortune-flow";
-import type { GenerateFortuneOutput } from "@/ai/schemas/fortune-schema";
 import { useToast } from "@/hooks/use-toast";
-import { Repeat } from "lucide-react";
-import { Skeleton } from "../ui/skeleton";
+import { Repeat, Apple, Award, ArrowRight, Banknote } from "lucide-react";
 import { useCredits } from "@/context/credits-context";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { cn } from "@/lib/utils";
+
+const TOTAL_LEVELS = 10;
+const APPLES_PER_LEVEL = 7;
+
+// Multipliers for each level (1-indexed)
+const levelMultipliers: { [key: number]: number } = {
+    1: 1.2,
+    2: 1.5,
+    3: 2,
+    4: 3,
+    5: 5,
+    6: 7,
+    7: 10,
+    8: 15,
+    9: 25,
+    10: 50,
+};
+
+interface Level {
+    apples: { state: 'hidden' | 'good' | 'bad' }[];
+    badAppleIndices: number[];
+}
 
 export default function FortuneAppleCard() {
-    const [gameState, setGameState] = useState<'ready' | 'loading' | 'revealed'>('ready');
-    const [result, setResult] = useState<GenerateFortuneOutput | null>(null);
+    const [gameState, setGameState] = useState<'betting' | 'playing' | 'gameOver'>('betting');
+    const [betAmount, setBetAmount] = useState(10);
     const { credits, setCredits } = useCredits();
-    const [betAmount, setBetAmount] = useState(1);
     const { toast } = useToast();
+    const [currentLevel, setCurrentLevel] = useState(0);
+    const [levels, setLevels] = useState<Level[]>([]);
+    const [potentialWinnings, setPotentialWinnings] = useState(0);
+    const levelsContainerRef = useRef<HTMLDivElement>(null);
 
-    const handlePlay = async () => {
+    const generateLevels = () => {
+        const newLevels = Array.from({ length: TOTAL_LEVELS }, (_, levelIndex) => {
+            // Bad apples increase with level, but max out at APPLES_PER_LEVEL - 1
+            const badAppleCount = Math.min(
+                Math.floor(levelIndex / 2) + 1, // Increases every 2 levels
+                APPLES_PER_LEVEL - 1 
+            );
+
+            const badAppleIndices = new Set<number>();
+            while (badAppleIndices.size < badAppleCount) {
+                badAppleIndices.add(Math.floor(Math.random() * APPLES_PER_LEVEL));
+            }
+            return {
+                apples: Array.from({ length: APPLES_PER_LEVEL }, () => ({ state: 'hidden' as 'hidden' })),
+                badAppleIndices: Array.from(badAppleIndices),
+            };
+        });
+        setLevels(newLevels);
+    };
+
+    const handleStartGame = () => {
         if(credits < betAmount) {
              toast({
                 title: "Insufficient Credits",
@@ -32,69 +75,132 @@ export default function FortuneAppleCard() {
         }
 
         setCredits(c => c - betAmount);
-        setGameState('loading');
-        setResult(null);
-        try {
-            const fortuneResult = await generateFortune();
-            const prize = fortuneResult.prize * betAmount;
-            const finalResult = {...fortuneResult, prize};
+        generateLevels();
+        setCurrentLevel(1);
+        setPotentialWinnings(betAmount);
+        setGameState('playing');
+    };
+    
+    useEffect(() => {
+        if (gameState === 'playing' && levelsContainerRef.current) {
+            // Scroll to the bottom to show Level 1 (since it's reversed)
+            levelsContainerRef.current.scrollTop = levelsContainerRef.current.scrollHeight;
+        }
+    }, [gameState]);
 
-            setResult(finalResult);
-            setCredits(c => c + prize);
-            setGameState('revealed');
+
+    const handleApplePick = (levelIndex: number, appleIndex: number) => {
+        if (gameState !== 'playing' || levelIndex + 1 !== currentLevel) return;
+
+        const newLevels = [...levels];
+        const pickedLevel = newLevels[levelIndex];
+
+        pickedLevel.apples.forEach((apple, i) => {
+            apple.state = pickedLevel.badAppleIndices.includes(i) ? 'bad' : 'good';
+        });
+
+        if (pickedLevel.badAppleIndices.includes(appleIndex)) {
+            // Picked bad apple
+            setGameState('gameOver');
             toast({
-                title: "Fortune Found!",
-                description: `You won ${prize.toLocaleString()} credits!`,
-            });
-        } catch (error) {
-            console.error("Failed to generate fortune:", error);
-            toast({
-                title: "Something went wrong",
-                description: "Could not fetch your fortune. Please try again.",
+                title: "Game Over!",
+                description: `You picked a rotten apple and lost your ${betAmount.toLocaleString()} credit bet.`,
                 variant: "destructive",
             });
-            setCredits(c => c + betAmount); // Refund
-            setGameState('ready');
+        } else {
+            // Picked good apple
+            const newWinnings = potentialWinnings * levelMultipliers[currentLevel];
+            setPotentialWinnings(newWinnings);
+
+            if (currentLevel === TOTAL_LEVELS) {
+                // Won the final level
+                setCredits(c => c + newWinnings);
+                setGameState('gameOver');
+                toast({
+                    title: "Congratulations!",
+                    description: `You completed all levels and won ${newWinnings.toLocaleString()} credits!`,
+                });
+            } else {
+                // Move to next level
+                setCurrentLevel(c => c + 1);
+            }
         }
+        setLevels(newLevels);
+    };
+
+    const handleCashOut = () => {
+        if (gameState !== 'playing' || currentLevel <= 1) return;
+        
+        const lastLevelMultiplier = levelMultipliers[currentLevel - 1];
+        const winnings = betAmount * lastLevelMultiplier;
+        
+        setCredits(c => c + winnings);
+        setGameState('gameOver');
+        toast({
+            title: "You Cashed Out!",
+            description: `You secured ${winnings.toLocaleString()} credits!`,
+        });
     };
 
     const handlePlayAgain = () => {
-        setGameState('ready');
-        setResult(null);
+        setGameState('betting');
+        setCurrentLevel(0);
+        setLevels([]);
     };
+    
+    const getWinningsForLevel = (level: number) => {
+        return betAmount * (levelMultipliers[level] || 1);
+    }
 
     return (
         <Card className="w-full max-w-lg mx-auto">
-            <CardHeader>
-                <CardTitle className="font-headline text-4xl text-primary">Fortune Apple</CardTitle>
-                <CardDescription className="font-body">Take a bite and see what fortune awaits. Your prize is multiplied by your bet!</CardDescription>
+            <CardHeader className="text-center">
+                <CardTitle className="font-headline text-4xl text-primary flex items-center justify-center gap-2">
+                    <Apple /> Apple of Fortune
+                </CardTitle>
+                <CardDescription className="font-body">Pick a good apple to advance. Cash out anytime or risk it all!</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center space-y-6">
-                <div className="relative w-full max-w-sm aspect-square">
-                    <Image 
-                        src="https://placehold.co/600.png"
-                        alt="A shiny red apple"
-                        fill
-                        className={`rounded-full object-cover transition-all duration-500 ${gameState === 'loading' ? 'animate-pulse' : ''}`}
-                        data-ai-hint="red apple"
-                    />
-                </div>
-
-                {gameState === 'loading' && (
-                    <div className="text-center p-4 rounded-lg bg-background/50 w-full min-h-[120px]">
-                        <Skeleton className="h-6 w-3/4 mx-auto mb-4" />
-                        <Skeleton className="h-10 w-1/2 mx-auto" />
+            <CardContent className="space-y-4">
+                {gameState !== 'betting' && (
+                     <div ref={levelsContainerRef} className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                        {levels.slice(0).reverse().map((level, i) => {
+                            const levelIndex = TOTAL_LEVELS - 1 - i;
+                            return (
+                                <div key={levelIndex} className={cn("p-3 rounded-lg transition-all duration-300", currentLevel === levelIndex + 1 && gameState === 'playing' ? 'bg-primary/10 border-2 border-primary' : 'bg-background/50 opacity-50')}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="font-headline text-lg">Level {levelIndex + 1}</h3>
+                                        <div className="text-right">
+                                            <p className="font-bold text-primary">{getWinningsForLevel(levelIndex + 1).toLocaleString()} Credits</p>
+                                            <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-4 sm:grid-cols-7 justify-around items-center h-auto gap-2">
+                                        {level.apples.map((apple, appleIndex) => (
+                                            <button
+                                                key={appleIndex}
+                                                onClick={() => handleApplePick(levelIndex, appleIndex)}
+                                                disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
+                                                className="disabled:cursor-not-allowed transition-transform hover:scale-110"
+                                            >
+                                                <Apple className={cn(
+                                                    "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
+                                                    apple.state === 'hidden' && 'text-yellow-900/50 opacity-50',
+                                                    apple.state === 'good' && 'text-green-500',
+                                                    apple.state === 'bad' && 'text-red-800 animate-pulse',
+                                                    (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
+                                                )}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                           )
+                        })}
                     </div>
                 )}
-
-                {gameState === 'revealed' && result && (
-                    <div className="text-center p-4 rounded-lg bg-background/50 w-full min-h-[120px]">
-                        <p className="text-lg font-body italic text-muted-foreground mb-2">"{result.fortune}"</p>
-                        <p className="text-2xl font-bold font-headline text-primary">You win {result.prize.toLocaleString()} credits!</p>
-                    </div>
-                )}
-
-                {gameState === 'ready' ? (
+            </CardContent>
+            <CardFooter className="flex-col space-y-4">
+                 {gameState === 'betting' && (
                      <div className="flex flex-col items-center space-y-4 w-full">
                         <div className="space-y-2">
                             <Label htmlFor="bet-amount">Bet Amount (Cost)</Label>
@@ -107,17 +213,31 @@ export default function FortuneAppleCard() {
                                 className="w-48 text-center"
                             />
                         </div>
-                        <Button onClick={handlePlay} disabled={gameState === 'loading'} className="w-48 text-lg font-headline">
-                            Take a Bite
+                        <Button onClick={handleStartGame} className="w-48 text-lg font-headline">
+                           Place Bet
                         </Button>
                     </div>
-                ) : (
+                )}
+
+                {gameState === 'playing' && (
+                     <Button 
+                        onClick={handleCashOut} 
+                        disabled={currentLevel <= 1}
+                        variant="secondary"
+                        className="w-48 text-lg font-headline gap-2"
+                     >
+                        <Banknote />
+                        Cash Out
+                    </Button>
+                )}
+
+                {gameState === 'gameOver' && (
                     <Button onClick={handlePlayAgain} variant="secondary" className="gap-2 w-48 text-lg font-headline">
                         <Repeat />
                         Play Again
                     </Button>
                 )}
-            </CardContent>
+            </CardFooter>
         </Card>
     );
 }
