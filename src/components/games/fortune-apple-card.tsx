@@ -13,7 +13,7 @@ import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
 
 const TOTAL_LEVELS = 10;
-const APPLES_PER_LEVEL = 5;
+const APPLES_PER_LEVEL = 7;
 
 // Multipliers for each level (1-indexed)
 const levelMultipliers: { [key: number]: number } = {
@@ -166,7 +166,7 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="flex justify-around items-center h-16 sm:h-20">
+                                    <div className="grid grid-cols-4 sm:grid-cols-7 justify-around items-center h-auto sm:h-20 gap-2">
                                         {level.apples.map((apple, appleIndex) => (
                                             <button
                                                 key={appleIndex}
