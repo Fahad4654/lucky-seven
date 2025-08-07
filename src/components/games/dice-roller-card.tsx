@@ -20,7 +20,7 @@ const DieFace = ({ face }: { face: number }) => {
         3: [1, 5, 9],
         4: [1, 3, 7, 9],
         5: [1, 3, 5, 7, 9],
-        6: [1, 3, 4, 6, 7, 9],
+        6: [1, 4, 7, 3, 6, 9],
     };
 
     const getFaceStyles = (face: number): React.CSSProperties => {
@@ -127,6 +127,7 @@ export default function DiceRollerCard() {
     const { credits, setCredits } = useCredits();
     const { toast } = useToast();
     const [isRolling, setIsRolling] = useState(false);
+    const [showResult, setShowResult] = useState(false);
 
     const handleRoll = () => {
         if (!betType) {
@@ -148,6 +149,7 @@ export default function DiceRollerCard() {
         }
 
         setIsRolling(true);
+        setShowResult(false);
         setWinStatus(null);
         setTotal(null);
         setCredits(c => c - betAmount);
@@ -158,6 +160,7 @@ export default function DiceRollerCard() {
 
             setResults(newResults);
             setTotal(newTotal);
+            setIsRolling(false);
 
             let win = false;
             let payoutMultiplier = 1;
@@ -186,7 +189,9 @@ export default function DiceRollerCard() {
                     variant: "destructive",
                 });
             }
-            setIsRolling(false);
+             setTimeout(() => {
+                setShowResult(true);
+            }, 500); // 0.5s delay before showing result
         }, 2100);
     };
 
@@ -252,7 +257,7 @@ export default function DiceRollerCard() {
                         ))}
                     </div>
 
-                    {!isRolling && total !== null && (
+                    {showResult && total !== null && (
                          <div className="text-center mt-4">
                              {winStatus && (
                                  <div className="text-center p-4 rounded-lg bg-background/50 w-full mb-4">
@@ -275,5 +280,3 @@ export default function DiceRollerCard() {
         </Card>
     );
 }
-
-    
