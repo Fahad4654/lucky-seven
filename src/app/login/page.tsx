@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/auth-context';
-import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
@@ -15,17 +14,12 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, loading } = useAuth();
-    const { toast } = useToast();
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        const success = await login(email, password);
-        if (success) {
-            toast({ title: 'Login successful!' });
-            router.push('/slot-machine'); // Redirect to a game page
-        }
-        // Error toast is handled in the auth context
+        await login(email, password);
+        // The redirection is now handled inside the login function in the auth context.
     };
 
     return (
