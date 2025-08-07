@@ -32,7 +32,7 @@ const PlayingCard = ({ card, isSelected, onClick, hidden }: { card: CardType, is
 
     if (hidden) {
          return (
-             <div className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
+            <div className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-blue-700 rounded-lg border-2 border-blue-900 flex items-center justify-center">
                 <div className="w-12 h-18 sm:w-14 sm:h-20 md:w-16 md:h-24 bg-blue-500 rounded-md" />
             </div>
         )
@@ -299,16 +299,16 @@ export default function PokerCard() {
     return (
         <Card className="w-full max-w-4xl mx-auto">
             <CardHeader>
-                <CardTitle className="font-headline text-3xl md:text-4xl text-primary">Versus Poker</CardTitle>
-                <CardDescription className="font-body">Play against the dealer. Get a better hand to win.</CardDescription>
+                <CardTitle className="font-headline text-2xl sm:text-3xl md:text-4xl text-primary">Versus Poker</CardTitle>
+                <CardDescription className="font-body text-sm sm:text-base">Play against the dealer. Get a better hand to win.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 md:space-y-6 flex flex-col items-center">
                 <div className="space-y-2 w-full">
-                    <h3 className="text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
+                    <h3 className="text-base sm:text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
                         <Bot /> Dealer's Hand
                         {dealerHandResult && <span className="text-sm md:text-lg text-primary font-body">({dealerHandResult.rank})</span>}
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center">
+                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center p-2 bg-muted/20 rounded-lg">
                         {dealerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-muted rounded-lg" />)}
                         {dealerHand.map((card, index) => (
                             <PlayingCard 
@@ -321,11 +321,11 @@ export default function PokerCard() {
                 </div>
 
                  <div className="space-y-2 w-full">
-                    <h3 className="text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
+                    <h3 className="text-base sm:text-lg md:text-2xl font-headline flex items-center justify-center gap-2">
                         <User /> Your Hand
                         {playerHandResult && <span className="text-sm md:text-lg text-primary font-body">({playerHandResult.rank})</span>}
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center">
+                    <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 min-h-[88px] sm:min-h-[104px] md:min-h-[120px] items-center p-2 bg-muted/20 rounded-lg">
                         {playerHand.length === 0 && Array(5).fill(0).map((_, i) => <div key={i} className="w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 bg-muted rounded-lg" />)}
                         {playerHand.map((card, index) => (
                             <PlayingCard 
@@ -343,8 +343,8 @@ export default function PokerCard() {
             </CardContent>
             <CardFooter className="flex-col space-y-4">
                  {gameState === 'betting' && (
-                     <div className="flex flex-col items-center space-y-4">
-                        <div className="space-y-2">
+                     <div className="flex flex-col items-center space-y-4 w-full max-w-xs">
+                        <div className="space-y-2 w-full">
                             <Label htmlFor="bet-amount">Bet Amount</Label>
                             <Input 
                                 id="bet-amount" 
@@ -352,10 +352,10 @@ export default function PokerCard() {
                                 value={betAmount} 
                                 onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
                                 min="1"
-                                className="w-48 text-center"
+                                className="w-full text-center"
                             />
                         </div>
-                        <Button onClick={handleDeal} className="w-48 text-lg font-headline">Deal</Button>
+                        <Button onClick={handleDeal} className="w-full text-lg font-headline">Deal</Button>
                     </div>
                 )}
                 {gameState === 'draw' && (

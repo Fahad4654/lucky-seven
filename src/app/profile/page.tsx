@@ -36,10 +36,10 @@ export default function ProfilePage() {
         <div className="w-full max-w-2xl mx-auto">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-3xl">Profile</CardTitle>
+                    <CardTitle className="font-headline text-2xl sm:text-3xl">Profile</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
                         <Avatar className="h-20 w-20">
                             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} />
                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
