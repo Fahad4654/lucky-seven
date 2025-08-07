@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');

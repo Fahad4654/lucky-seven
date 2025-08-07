@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/auth-context';
 
-const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const refreshToken = async () => {
     const currentRefreshToken = localStorage.getItem('refreshToken');

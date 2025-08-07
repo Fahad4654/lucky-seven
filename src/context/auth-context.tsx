@@ -26,7 +26,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -118,8 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (initialLoading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center">
-                 <Skeleton className="h-[450px] w-[400px]" />
+             <div className="flex h-screen w-full items-center justify-center bg-background">
+                {children}
             </div>
         );
     }

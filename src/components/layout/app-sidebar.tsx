@@ -29,8 +29,9 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (!user || pathname === '/login' || pathname === '/register') {
-    return null; // Don't show sidebar if not logged in or on auth pages
+  // Don't show sidebar on auth pages or if not logged in
+  if (pathname === '/login' || pathname === '/register' || !user) {
+    return null;
   }
 
   return (
