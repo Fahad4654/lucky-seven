@@ -19,7 +19,6 @@ export default function LoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         await login(email, password);
-        // The redirection is now handled inside the login function in the auth context.
     };
 
     return (

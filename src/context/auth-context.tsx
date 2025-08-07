@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface User {
     id: string;
@@ -113,9 +114,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push('/login');
     };
 
+    if (loading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                 <Skeleton className="h-[450px] w-[400px]" />
+            </div>
+        );
+    }
+
+
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 }
