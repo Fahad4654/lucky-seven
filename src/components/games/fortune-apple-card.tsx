@@ -79,6 +79,9 @@ export default function FortuneAppleCard() {
             pickedLevel.apples.forEach((apple, i) => {
                 apple.state = i === pickedLevel.badAppleIndex ? 'bad' : 'good';
             });
+            // The picked apple is bad, but we want to show it as bad
+            pickedLevel.apples[appleIndex].state = 'bad';
+            
             setGameState('gameOver');
             toast({
                 title: "Game Over!",
