@@ -16,16 +16,13 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
-import { Diamond, Spade, Heart, Dice5, Apple, Home } from "lucide-react";
+import { Home, User, Wallet } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const menuItems = [
   { href: "/home", label: "Home", icon: Home },
-  { href: "/slot-machine", label: "Slot Machine", icon: Diamond },
-  { href: "/blackjack", label: "Blackjack", icon: Spade },
-  { href: "/poker", label: "Poker", icon: Heart },
-  { href: "/dice-roller", label: "Dice Roller", icon: Dice5 },
-  { href: "/fortune-apple", label: "Fortune Apple", icon: Apple },
+  { href: "/profile", label: "Profile", icon: User },
+  { href: "/wallet", label: "Wallet", icon: Wallet },
 ];
 
 export default function AppSidebar() {

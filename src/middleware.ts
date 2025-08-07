@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
     '/dice-roller',
     '/fortune-apple',
     '/poker',
-    '/slot-machine'
+    '/slot-machine',
+    '/profile',
+    '/wallet'
   ];
 
   const isAuthRoute = pathname === '/login' || pathname === '/register';
@@ -51,5 +53,7 @@ export const config = {
     '/slot-machine',
     '/login',
     '/register',
+    '/profile',
+    '/wallet'
   ],
 };
