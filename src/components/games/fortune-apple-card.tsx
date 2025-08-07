@@ -12,8 +12,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
 
-const TOTAL_LEVELS = 5;
-const APPLES_PER_LEVEL = 3;
+const TOTAL_LEVELS = 10;
+const APPLES_PER_LEVEL = 5;
 
 // Multipliers for each level (1-indexed)
 const levelMultipliers: { [key: number]: number } = {
@@ -22,6 +22,11 @@ const levelMultipliers: { [key: number]: number } = {
     3: 2,
     4: 3,
     5: 5,
+    6: 7,
+    7: 10,
+    8: 15,
+    9: 25,
+    10: 50,
 };
 
 interface Level {
