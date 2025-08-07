@@ -1,0 +1,62 @@
+
+'use client';
+
+import { useAuth } from '@/context/auth-context';
+
+const API_BASE_URL = 'https://express-ts-api-fhcn.onrender.com/v1/api';
+
+const refreshToken = async () => {
+    const currentRefreshToken = localStorage.getItem('refreshToken');
+    if (!currentRefreshToken) {
+        throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: currentRefreshToken }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Failed to refresh token');
+    }
+
+    localStorage.setItem('accessToken', data.accessToken);
+    return data.accessToken;
+};
+
+const api = async (url: string, options: RequestInit = {}) => {
+    let accessToken = localStorage.getItem('accessToken');
+
+    // Add Authorization header
+    options.headers = {
+        ...options.headers,
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+    };
+
+    let response = await fetch(`${API_BASE_URL}${url}`, options);
+
+    if (response.status === 401) {
+        try {
+            const newAccessToken = await refreshToken();
+            // Update header with new token
+            (options.headers as Record<string, string>)['Authorization'] = `Bearer ${newAccessToken}`;
+            // Retry the original request
+            response = await fetch(`${API_BASE_URL}${url}`, options);
+        } catch (error) {
+            // If refresh fails, we can't recover.
+            // The useAuth hook should handle this, or we can force a logout.
+            console.error('Session expired. Please log in again.', error);
+            // This is where you might call a logout function.
+            // For now, we'll re-throw the error.
+            throw new Error('Session expired.');
+        }
+    }
+
+    return response;
+};
+
+export default api;
