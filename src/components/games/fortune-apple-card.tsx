@@ -34,6 +34,23 @@ interface Level {
     badAppleIndex: number;
 }
 
+const WickerBasket = () => (
+    <div className="relative w-full">
+         <svg viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-lg">
+            {/* Basket Rim */}
+            <path d="M 5,10 C 5,5 10,5 15,5 L 85,5 C 90,5 95,5 95,10" fill="#a1662f" />
+            {/* Basket Body */}
+            <path d="M 5,10 L 15,35 C 15,40 20,40 25,40 L 75,40 C 80,40 85,40 85,35 L 95,10 Z" fill="#b97c45" />
+            {/* Weave Pattern */}
+            <g stroke="#885522" strokeWidth="0.5">
+                {Array.from({length: 10}).map((_, i) => <path key={`v-${i}`} d={`M ${15 + i*7},5 L ${25 + i*5}, 40`} />)}
+                {Array.from({length: 4}).map((_, i) => <path key={`h-${i}`} d={`M 5, ${15 + i*6} C 30,${12+i*6} 70,${12+i*6} 95,${15 + i*6}`} fill="none" />)}
+            </g>
+        </svg>
+    </div>
+)
+
+
 export default function FortuneAppleCard() {
     const [gameState, setGameState] = useState<'betting' | 'playing' | 'gameOver'>('betting');
     const [betAmount, setBetAmount] = useState(10);
@@ -76,7 +93,9 @@ export default function FortuneAppleCard() {
 
         if (appleIndex === pickedLevel.badAppleIndex) {
             // Picked bad apple
-            pickedLevel.apples[appleIndex].state = 'bad';
+            pickedLevel.apples.forEach((apple, i) => {
+                apple.state = i === pickedLevel.badAppleIndex ? 'bad' : 'good';
+            });
             setGameState('gameOver');
             toast({
                 title: "Game Over!",
@@ -139,36 +158,45 @@ export default function FortuneAppleCard() {
             </CardHeader>
             <CardContent className="space-y-4">
                 {gameState !== 'betting' && (
-                    <div className="space-y-4">
-                        {levels.map((level, levelIndex) => (
-                             <div key={levelIndex} className={cn("p-3 rounded-lg transition-all duration-300", currentLevel === levelIndex + 1 && gameState === 'playing' ? 'bg-primary/10 border-2 border-primary' : 'bg-background/50')}>
-                                <div className="flex justify-between items-center mb-2">
-                                     <h3 className="font-headline text-lg">Level {levelIndex + 1}</h3>
-                                     <div className="text-right">
-                                        <p className="font-bold text-primary">{getWinningsForLevel(levelIndex + 1).toLocaleString()} Credits</p>
-                                        <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
+                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                        {levels.slice(0).reverse().map((level, i) => {
+                            const levelIndex = TOTAL_LEVELS - 1 - i;
+                            return (
+                                <div key={levelIndex} className={cn("p-3 rounded-lg transition-all duration-300", currentLevel === levelIndex + 1 && gameState === 'playing' ? 'bg-primary/10 border-2 border-primary' : 'bg-background/50 opacity-50')}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="font-headline text-lg">Level {levelIndex + 1}</h3>
+                                        <div className="text-right">
+                                            <p className="font-bold text-primary">{getWinningsForLevel(levelIndex + 1).toLocaleString()} Credits</p>
+                                            <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                         <div className="relative z-10 flex justify-around p-4">
+                                            {level.apples.map((apple, appleIndex) => (
+                                                <button 
+                                                    key={appleIndex} 
+                                                    onClick={() => handleApplePick(levelIndex, appleIndex)}
+                                                    disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
+                                                    className="disabled:cursor-not-allowed transition-transform hover:scale-110"
+                                                >
+                                                    <Apple className={cn(
+                                                        "w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg",
+                                                        apple.state === 'hidden' && 'text-yellow-900/50 opacity-50',
+                                                        apple.state === 'good' && 'text-green-500',
+                                                        apple.state === 'bad' && 'text-red-800 animate-pulse',
+                                                         (gameState !== 'playing' || currentLevel !== levelIndex + 1) ? '' : 'text-yellow-400 hover:text-yellow-300'
+                                                    )} 
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="absolute bottom-0 left-0 right-0 z-0">
+                                            <WickerBasket />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex justify-around">
-                                    {level.apples.map((apple, appleIndex) => (
-                                        <button 
-                                            key={appleIndex} 
-                                            onClick={() => handleApplePick(levelIndex, appleIndex)}
-                                            disabled={gameState !== 'playing' || currentLevel !== levelIndex + 1}
-                                            className="disabled:cursor-not-allowed disabled:opacity-50 transition-transform hover:scale-105"
-                                        >
-                                            <Apple className={cn(
-                                                "w-12 h-12 md:w-16 md:h-16",
-                                                apple.state === 'hidden' && 'text-gray-500',
-                                                apple.state === 'good' && 'text-green-500',
-                                                apple.state === 'bad' && 'text-red-700 animate-pulse',
-                                            )} 
-                                            />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                           )
+                        })}
                     </div>
                 )}
             </CardContent>
@@ -214,3 +242,4 @@ export default function FortuneAppleCard() {
         </Card>
     );
 }
+
