@@ -62,10 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 throw new Error(data.message || 'Login failed');
             }
 
-            const { user: loggedInUser, accessToken } = data;
+            const { user: loggedInUser, accessToken, refreshToken } = data;
 
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
             // Set a cookie for middleware to read
             document.cookie = `user=true; path=/; max-age=${60 * 60 * 24 * 7}`;
             setUser(loggedInUser);
@@ -83,11 +84,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if (refreshToken) {
+            try {
+                await fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ refreshToken }),
+                });
+            } catch (error) {
+                console.error("Logout API call failed", error);
+                // We still proceed to log out the user on the client side
+            }
+        }
+
+        // Clear local storage and cookies
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
-        // Clear the cookie
+        localStorage.removeItem('refreshToken');
         document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
+        // Update state and redirect
         setUser(null);
         router.push('/login');
     };
