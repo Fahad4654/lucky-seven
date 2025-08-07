@@ -45,7 +45,12 @@ export default function FortuneAppleCard() {
 
     const generateLevels = () => {
         const newLevels = Array.from({ length: TOTAL_LEVELS }, (_, levelIndex) => {
-            const badAppleCount = Math.floor(Math.random() * 4) + 1; // 1 to 4 bad apples
+            // Bad apples increase with level, but max out at APPLES_PER_LEVEL - 1
+            const badAppleCount = Math.min(
+                Math.floor(levelIndex / 2) + 1, // Increases every 2 levels
+                APPLES_PER_LEVEL - 1 
+            );
+
             const badAppleIndices = new Set<number>();
             while (badAppleIndices.size < badAppleCount) {
                 badAppleIndices.add(Math.floor(Math.random() * APPLES_PER_LEVEL));
