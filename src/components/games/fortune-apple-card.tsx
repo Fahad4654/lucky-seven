@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ export default function FortuneAppleCard() {
     const [currentLevel, setCurrentLevel] = useState(0);
     const [levels, setLevels] = useState<Level[]>([]);
     const [potentialWinnings, setPotentialWinnings] = useState(0);
+    const levelsContainerRef = useRef<HTMLDivElement>(null);
 
     const generateLevels = () => {
         const newLevels = Array.from({ length: TOTAL_LEVELS }, (_, levelIndex) => {
@@ -80,18 +81,26 @@ export default function FortuneAppleCard() {
         setGameState('playing');
     };
     
+    useEffect(() => {
+        if (gameState === 'playing' && levelsContainerRef.current) {
+            // Scroll to the bottom to show Level 1 (since it's reversed)
+            levelsContainerRef.current.scrollTop = levelsContainerRef.current.scrollHeight;
+        }
+    }, [gameState]);
+
+
     const handleApplePick = (levelIndex: number, appleIndex: number) => {
         if (gameState !== 'playing' || levelIndex + 1 !== currentLevel) return;
 
         const newLevels = [...levels];
         const pickedLevel = newLevels[levelIndex];
 
+        pickedLevel.apples.forEach((apple, i) => {
+            apple.state = pickedLevel.badAppleIndices.includes(i) ? 'bad' : 'good';
+        });
+
         if (pickedLevel.badAppleIndices.includes(appleIndex)) {
             // Picked bad apple
-            pickedLevel.apples.forEach((apple, i) => {
-                apple.state = pickedLevel.badAppleIndices.includes(i) ? 'bad' : 'good';
-            });
-            
             setGameState('gameOver');
             toast({
                 title: "Game Over!",
@@ -100,7 +109,6 @@ export default function FortuneAppleCard() {
             });
         } else {
             // Picked good apple
-            pickedLevel.apples[appleIndex].state = 'good';
             const newWinnings = potentialWinnings * levelMultipliers[currentLevel];
             setPotentialWinnings(newWinnings);
 
@@ -154,7 +162,7 @@ export default function FortuneAppleCard() {
             </CardHeader>
             <CardContent className="space-y-4">
                 {gameState !== 'betting' && (
-                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                     <div ref={levelsContainerRef} className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
                         {levels.slice(0).reverse().map((level, i) => {
                             const levelIndex = TOTAL_LEVELS - 1 - i;
                             return (
@@ -166,7 +174,7 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-4 sm:grid-cols-7 justify-around items-center h-auto sm:h-20 gap-2">
+                                    <div className="grid grid-cols-4 sm:grid-cols-7 justify-around items-center h-auto gap-2">
                                         {level.apples.map((apple, appleIndex) => (
                                             <button
                                                 key={appleIndex}
