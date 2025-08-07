@@ -13,7 +13,7 @@ import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
 
 const TOTAL_LEVELS = 10;
-const APPLES_PER_LEVEL = 7;
+const APPLES_PER_LEVEL = 5;
 
 // Multipliers for each level (1-indexed)
 const levelMultipliers: { [key: number]: number } = {
@@ -48,7 +48,7 @@ export default function FortuneAppleCard() {
         const newLevels = Array.from({ length: TOTAL_LEVELS }, (_, levelIndex) => {
             // Bad apples increase with level, but max out at APPLES_PER_LEVEL - 1
             const badAppleCount = Math.min(
-                Math.floor(levelIndex / 2) + 1, // Increases every 2 levels
+                Math.floor(levelIndex / 3) + 1, // Increases every 3 levels
                 APPLES_PER_LEVEL - 1 
             );
 
@@ -155,10 +155,10 @@ export default function FortuneAppleCard() {
     return (
         <Card className="w-full max-w-lg mx-auto">
             <CardHeader className="text-center">
-                <CardTitle className="font-headline text-4xl text-primary flex items-center justify-center gap-2">
+                <CardTitle className="font-headline text-3xl sm:text-4xl text-primary flex items-center justify-center gap-2">
                     <Apple /> Apple of Fortune
                 </CardTitle>
-                <CardDescription className="font-body">Pick a good apple to advance. Cash out anytime or risk it all!</CardDescription>
+                <CardDescription className="font-body text-sm sm:text-base">Pick a good apple to advance. Cash out anytime or risk it all!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 {gameState !== 'betting' && (
@@ -174,7 +174,7 @@ export default function FortuneAppleCard() {
                                             <p className="text-xs text-muted-foreground">x{levelMultipliers[levelIndex+1]} Multiplier</p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-4 sm:grid-cols-7 justify-around items-center h-auto gap-2">
+                                    <div className="grid grid-cols-5 justify-around items-center h-auto gap-2">
                                         {level.apples.map((apple, appleIndex) => (
                                             <button
                                                 key={appleIndex}
@@ -201,8 +201,8 @@ export default function FortuneAppleCard() {
             </CardContent>
             <CardFooter className="flex-col space-y-4">
                  {gameState === 'betting' && (
-                     <div className="flex flex-col items-center space-y-4 w-full">
-                        <div className="space-y-2">
+                     <div className="flex flex-col items-center space-y-4 w-full max-w-xs">
+                        <div className="space-y-2 w-full">
                             <Label htmlFor="bet-amount">Bet Amount (Cost)</Label>
                             <Input 
                                 id="bet-amount" 
@@ -210,10 +210,10 @@ export default function FortuneAppleCard() {
                                 value={betAmount} 
                                 onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
                                 min="1"
-                                className="w-48 text-center"
+                                className="w-full text-center"
                             />
                         </div>
-                        <Button onClick={handleStartGame} className="w-48 text-lg font-headline">
+                        <Button onClick={handleStartGame} className="w-full text-lg font-headline">
                            Place Bet
                         </Button>
                     </div>
@@ -224,7 +224,7 @@ export default function FortuneAppleCard() {
                         onClick={handleCashOut} 
                         disabled={currentLevel <= 1}
                         variant="secondary"
-                        className="w-48 text-lg font-headline gap-2"
+                        className="w-full max-w-xs text-lg font-headline gap-2"
                      >
                         <Banknote />
                         Cash Out
@@ -232,7 +232,7 @@ export default function FortuneAppleCard() {
                 )}
 
                 {gameState === 'gameOver' && (
-                    <Button onClick={handlePlayAgain} variant="secondary" className="gap-2 w-48 text-lg font-headline">
+                    <Button onClick={handlePlayAgain} variant="secondary" className="gap-2 w-full max-w-xs text-lg font-headline">
                         <Repeat />
                         Play Again
                     </Button>

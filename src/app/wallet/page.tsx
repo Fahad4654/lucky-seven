@@ -29,10 +29,10 @@ export default function WalletPage() {
                 {/* Balance Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="font-headline text-3xl">Your Balance</CardTitle>
+                        <CardTitle className="font-headline text-2xl sm:text-3xl">Your Balance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-5xl font-bold font-headline text-primary">{credits.toLocaleString()}</p>
+                        <p className="text-4xl sm:text-5xl font-bold font-headline text-primary">{credits.toLocaleString()}</p>
                         <p className="text-muted-foreground">Available Credits</p>
                     </CardContent>
                 </Card>
@@ -40,7 +40,7 @@ export default function WalletPage() {
                 {/* Add Funds Card */}
                 <Card>
                      <CardHeader>
-                        <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                        <CardTitle className="font-headline text-xl sm:text-2xl flex items-center gap-2">
                            <Banknote/> Add Funds
                         </CardTitle>
                         <CardDescription>Top up your balance to keep playing.</CardDescription>
@@ -67,7 +67,7 @@ export default function WalletPage() {
             <div>
                  <Card>
                     <CardHeader>
-                        <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                        <CardTitle className="font-headline text-xl sm:text-2xl flex items-center gap-2">
                            <History/> History
                         </CardTitle>
                          <CardDescription>Your recent transactions.</CardDescription>

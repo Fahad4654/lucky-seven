@@ -218,16 +218,16 @@ export default function BlackjackCard() {
     return (
         <Card className="w-full max-w-4xl mx-auto">
             <CardHeader>
-                <CardTitle className="font-headline text-3xl md:text-4xl text-primary">Blackjack</CardTitle>
-                <CardDescription className="font-body">Get closer to 21 than the dealer to win!</CardDescription>
+                <CardTitle className="font-headline text-2xl sm:text-3xl md:text-4xl text-primary">Blackjack</CardTitle>
+                <CardDescription className="font-body text-sm sm:text-base">Get closer to 21 than the dealer to win!</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 md:space-y-8">
+            <CardContent className="space-y-4 md:space-y-8">
                 {/* Dealer's Hand */}
                 <div className="space-y-2">
-                    <h3 className="text-xl md:text-2xl font-headline flex items-center gap-2">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-headline flex items-center gap-2">
                         <Bot /> Dealer's Hand ({gameState === 'playerTurn' || gameState === 'betting' ? '?' : dealerScore})
                     </h3>
-                    <div className="flex flex-wrap gap-2 min-h-[104px] sm:min-h-[120px] md:min-h-[152px] items-center">
+                    <div className="flex flex-wrap gap-2 min-h-[104px] sm:min-h-[120px] md:min-h-[152px] items-center p-2 bg-muted/20 rounded-lg">
                         {dealerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36 bg-muted rounded-lg" />)}
                         {dealerHand.map((card, index) => (
                             <PlayingCard key={index} card={card} hidden={(gameState === 'playerTurn' || gameState === 'betting') && index === 1} />
@@ -237,10 +237,10 @@ export default function BlackjackCard() {
 
                 {/* Player's Hand */}
                 <div className="space-y-2">
-                    <h3 className="text-xl md:text-2xl font-headline flex items-center gap-2">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-headline flex items-center gap-2">
                         <User /> Your Hand ({playerScore})
                     </h3>
-                    <div className="flex flex-wrap gap-2 min-h-[104px] sm:min-h-[120px] md:min-h-[152px] items-center">
+                    <div className="flex flex-wrap gap-2 min-h-[104px] sm:min-h-[120px] md:min-h-[152px] items-center p-2 bg-muted/20 rounded-lg">
                         {playerHand.length === 0 && Array(2).fill(0).map((_, i) => <div key={i} className="w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36 bg-muted rounded-lg" />)}
                         {playerHand.map((card, index) => (
                             <PlayingCard key={index} card={card} />
@@ -252,7 +252,7 @@ export default function BlackjackCard() {
             <CardFooter className="flex-col space-y-4">
                 {gameState === 'betting' && (
                      <div className="flex flex-col items-center space-y-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2 w-full max-w-xs">
                             <Label htmlFor="bet-amount">Bet Amount</Label>
                             <Input 
                                 id="bet-amount" 
@@ -260,10 +260,10 @@ export default function BlackjackCard() {
                                 value={betAmount} 
                                 onChange={(e) => setBetAmount(Math.max(1, parseInt(e.target.value) || 0))}
                                 min="1"
-                                className="w-48 text-center"
+                                className="w-full text-center"
                             />
                         </div>
-                        <Button onClick={handleDeal} className="w-48 text-lg font-headline">Deal</Button>
+                        <Button onClick={handleDeal} className="w-full max-w-xs text-lg font-headline">Deal</Button>
                     </div>
                 )}
                 {gameState === 'playerTurn' && (
