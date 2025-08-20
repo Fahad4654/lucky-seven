@@ -19,3 +19,300 @@
 - Use high-resolution icons that symbolize luck and casino themes (e.g., dice, cards, coins).
 - A layout reminiscent of casinos. Slot machine fills the screen; a left pane showing play history; a top status bar showing balance.
 - Incorporate subtle animations to simulate spinning reels and highlight winning combinations.
+
+---
+
+# API Specifications
+
+This section outlines the expected API request and response formats for each game if the logic were handled by a backend server.
+
+## Slot Machine API
+
+**Endpoint:** `POST /api/games/slot/spin`
+
+### Request Body
+```json
+{
+  "betAmount": 10
+}
+```
+
+### Response Body (Winning Spin)
+```json
+{
+  "reels": [
+    ["diamond", "cherry", "bell", "clover", "star", "seven"],
+    ["diamond", "star", "cherry", "seven", "bell", "clover"],
+    ["diamond", "clover", "seven", "star", "cherry", "bell"]
+  ],
+  "isWin": true,
+  "winAmount": 500,
+  "winningSymbol": "diamond"
+}
+```
+
+### Response Body (Losing Spin)
+```json
+{
+  "reels": [
+    ["cherry", "diamond", "bell", "clover", "star", "seven"],
+    ["diamond", "star", "cherry", "seven", "bell", "clover"],
+    ["bell", "clover", "seven", "star", "cherry", "diamond"]
+  ],
+  "isWin": false,
+  "winAmount": 0,
+  "winningSymbol": null
+}
+```
+
+---
+
+## Blackjack API
+
+**Endpoint Base:** `/api/games/blackjack`
+
+### 1. Deal
+**Request:** `POST /api/games/blackjack/deal`
+```json
+{
+  "betAmount": 10
+}
+```
+**Response:**
+```json
+{
+  "playerHand": [
+    { "suit": "Hearts", "rank": "Q" },
+    { "suit": "Spades", "rank": "7" }
+  ],
+  "dealerHand": [
+    { "suit": "Clubs", "rank": "9" },
+    { "suit": "Diamonds", "rank": "K", "hidden": true }
+  ],
+  "playerScore": 17,
+  "dealerScore": 9,
+  "gameState": "playerTurn",
+  "winner": null,
+  "winAmount": 0
+}
+```
+
+### 2. Hit
+**Request:** `POST /api/games/blackjack/hit` (No Body)
+**Response:**
+```json
+{
+  "playerHand": [
+    { "suit": "Hearts", "rank": "Q" },
+    { "suit": "Spades", "rank": "7" },
+    { "suit": "Diamonds", "rank": "4" }
+  ],
+  "dealerHand": [
+    { "suit": "Clubs", "rank": "9" },
+    { "suit": "Diamonds", "rank": "K", "hidden": true }
+  ],
+  "playerScore": 21,
+  "dealerScore": 9,
+  "gameState": "playerTurn",
+  "winner": null,
+  "winAmount": 0
+}
+```
+
+### 3. Stand
+**Request:** `POST /api/games/blackjack/stand` (No Body)
+**Response:**
+```json
+{
+  "playerHand": [
+    { "suit": "Hearts", "rank": "Q" },
+    { "suit": "Spades", "rank": "7" }
+  ],
+  "dealerHand": [
+    { "suit": "Clubs", "rank": "9" },
+    { "suit": "Diamonds", "rank": "K", "hidden": false },
+    { "suit": "Clubs", "rank": "A", "hidden": false }
+  ],
+  "playerScore": 17,
+  "dealerScore": 20,
+  "gameState": "gameOver",
+  "winner": "Dealer",
+  "winAmount": 0
+}
+```
+
+---
+
+## Fortune Apple API
+
+**Endpoint Base:** `/api/games/fortune-apple`
+
+### 1. Start Game
+**Request:** `POST /api/games/fortune-apple/start`
+```json
+{
+  "betAmount": 10
+}
+```
+**Response:**
+```json
+{
+  "gameId": "unique-game-session-123",
+  "gameState": "playing",
+  "currentLevel": 1,
+  "nextWinAmount": 12
+}
+```
+
+### 2. Pick an Apple
+**Request:** `POST /api/games/fortune-apple/pick`
+```json
+{
+  "gameId": "unique-game-session-123",
+  "level": 1,
+  "appleIndex": 2
+}
+```
+**Response (Good Apple):**
+```json
+{
+  "gameId": "unique-game-session-123",
+  "gameState": "playing",
+  "pickResult": "good",
+  "currentLevel": 2,
+  "nextWinAmount": 18,
+  "lastLevelOutcome": {
+    "level": 1,
+    "pickedIndex": 2,
+    "badAppleIndices": [4]
+  }
+}
+```
+**Response (Bad Apple):**
+```json
+{
+  "gameId": "unique-game-session-123",
+  "gameState": "gameOver",
+  "pickResult": "bad",
+  "finalWinAmount": 0,
+  "lastLevelOutcome": {
+    "level": 1,
+    "pickedIndex": 4,
+    "badAppleIndices": [4]
+  }
+}
+```
+
+### 3. Cash Out
+**Request:** `POST /api/games/fortune-apple/cashout`
+```json
+{
+  "gameId": "unique-game-session-123"
+}
+```
+**Response:**
+```json
+{
+  "gameId": "unique-game-session-123",
+  "gameState": "gameOver",
+  "finalWinAmount": 12
+}
+```
+
+---
+
+## Dice Roller API
+
+**Endpoint:** `POST /api/games/diceroller/roll`
+
+### Request Body
+```json
+{
+  "betAmount": 10,
+  "betType": "high",
+  "numDice": 3
+}
+```
+
+### Response Body
+```json
+{
+  "results": [6, 4, 3],
+  "total": 13,
+  "isWin": true,
+  "winAmount": 20
+}
+```
+
+---
+
+## Poker API
+
+**Endpoint Base:** `/api/games/poker`
+
+### 1. Deal
+**Request:** `POST /api/games/poker/deal`
+```json
+{
+  "betAmount": 10
+}
+```
+**Response:**
+```json
+{
+  "gameId": "unique-poker-game-456",
+  "gameState": "draw",
+  "playerHand": [
+    { "suit": "Hearts", "rank": "K" },
+    { "suit": "Spades", "rank": "K" },
+    { "suit": "Hearts", "rank": "7" },
+    { "suit": "Diamonds", "rank": "2" },
+    { "suit": "Clubs", "rank": "5" }
+  ],
+  "dealerHand": [
+    { "suit": "Spades", "rank": "A" },
+    { "suit": "Clubs", "rank": "J" },
+    { "suit": "Diamonds", "rank": "9" },
+    { "suit": "Hearts", "rank": "4" },
+    { "suit": "Spades", "rank": "3" }
+  ]
+}
+```
+
+### 2. Draw
+**Request:** `POST /api/games/poker/draw`
+```json
+{
+  "gameId": "unique-poker-game-456",
+  "holdIndices": [0, 1]
+}
+```
+**Response:**
+```json
+{
+  "gameId": "unique-poker-game-456",
+  "gameState": "showdown",
+  "playerHand": {
+    "cards": [
+      { "suit": "Hearts", "rank": "K" },
+      { "suit": "Spades", "rank": "K" },
+      { "suit": "Diamonds", "rank": "K" },
+      { "suit": "Clubs", "rank": "8" },
+      { "suit": "Hearts", "rank": "9" }
+    ],
+    "rank": "Three of a Kind"
+  },
+  "dealerHand": {
+    "cards": [
+      { "suit": "Spades", "rank": "A" },
+      { "suit": "Clubs", "rank": "A" },
+      { "suit": "Diamonds", "rank": "9" },
+      { "suit": "Hearts", "rank": "4" },
+      { "suit": "Spades", "rank": "3" }
+    ],
+    "rank": "One Pair"
+  },
+  "winner": "Player",
+  "winAmount": 20
+}
+```
