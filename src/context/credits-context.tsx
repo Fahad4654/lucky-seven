@@ -10,12 +10,16 @@ interface CreditsContextType {
     credits: number;
     setCredits: React.Dispatch<React.SetStateAction<number>>;
     loading: boolean;
+    accountId: string | null;
+    balanceId: string | null;
 }
 
 const CreditsContext = createContext<CreditsContextType | undefined>(undefined);
 
 export function CreditsProvider({ children }: { children: ReactNode }) {
     const [credits, setCredits] = useState(0);
+    const [accountId, setAccountId] = useState<string | null>(null);
+    const [balanceId, setBalanceId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const { toast } = useToast();
@@ -41,16 +45,17 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
                 }
 
                 const accountData = await accountResponse.json();
-                const accountId = accountData.account?.id;
+                const fetchedAccountId = accountData.account?.id;
 
-                if (!accountId) {
+                if (!fetchedAccountId) {
                     throw new Error('Account ID not found in response.');
                 }
+                setAccountId(fetchedAccountId);
 
                 // 2. Fetch balance using accountId
                 const balanceResponse = await api('/find/balance', {
                     method: 'POST',
-                    body: JSON.stringify({ accountId }),
+                    body: JSON.stringify({ accountId: fetchedAccountId }),
                 });
 
                 if (!balanceResponse.ok) {
@@ -59,11 +64,18 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
 
                 const balanceData = await balanceResponse.json();
                 const availableBalance = balanceData.balance?.availableBalance;
+                const fetchedBalanceId = balanceData.balance?.id;
 
                 if (availableBalance !== undefined) {
                     setCredits(parseFloat(availableBalance));
                 } else {
                      throw new Error('Available balance not found in response.');
+                }
+                
+                if (fetchedBalanceId) {
+                    setBalanceId(fetchedBalanceId);
+                } else {
+                    throw new Error('Balance ID not found in response.');
                 }
 
             } catch (error: any) {
@@ -98,7 +110,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
     }, [user, toast]);
     
     return (
-        <CreditsContext.Provider value={{ credits, setCredits, loading }}>
+        <CreditsContext.Provider value={{ credits, setCredits, loading, accountId, balanceId }}>
             {children}
         </CreditsContext.Provider>
     );

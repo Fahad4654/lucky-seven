@@ -6,21 +6,70 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCredits } from "@/context/credits-context";
-import { Banknote, History, Landmark } from "lucide-react";
+import { Banknote, History, Landmark, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-context";
+import api from "@/lib/api";
 
 export default function WalletPage() {
-    const { credits, setCredits } = useCredits();
+    const { user } = useAuth();
+    const { credits, setCredits, accountId, balanceId, loading: creditsLoading } = useCredits();
     const [amount, setAmount] = useState(100);
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     
-    const handleAddFunds = () => {
-        setCredits(c => c + amount);
-        toast({
-            title: "Funds Added",
-            description: `${amount.toLocaleString()} credits have been added to your balance.`,
-        });
+    const handleAddFunds = async () => {
+        if (!user || !accountId || !balanceId) {
+            toast({
+                title: "Error",
+                description: "User, account, or balance information is missing.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const trxId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+            const response = await api('/transaction', {
+                method: 'POST',
+                body: JSON.stringify({
+                    userId: user.id,
+                    accountId: accountId,
+                    balanceId: balanceId,
+                    type: "deposit",
+                    direction: "credit",
+                    amount: amount.toString(),
+                    currency: "BDT",
+                    description: "Added funds from website",
+                    trxId: trxId,
+                    status: "pending"
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to create transaction.');
+            }
+
+            setCredits(c => c + amount);
+            toast({
+                title: "Transaction Successful",
+                description: `${amount.toLocaleString()} credits have been added to your balance.`,
+            });
+            setAmount(100);
+
+        } catch (error: any) {
+             toast({
+                title: "Failed to Add Funds",
+                description: error.message || 'An unknown error occurred.',
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -32,7 +81,9 @@ export default function WalletPage() {
                         <CardTitle className="font-headline text-2xl sm:text-3xl">Your Balance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-4xl sm:text-5xl font-bold font-headline text-primary">{credits.toLocaleString()}</p>
+                        <p className="text-4xl sm:text-5xl font-bold font-headline text-primary">
+                             {creditsLoading ? <Loader2 className="h-10 w-10 animate-spin"/> : credits.toLocaleString()}
+                        </p>
                         <p className="text-muted-foreground">Available Credits</p>
                     </CardContent>
                 </Card>
@@ -54,10 +105,12 @@ export default function WalletPage() {
                                 value={amount}
                                 onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 0))}
                                 min="1"
+                                disabled={loading}
                             />
                         </div>
-                        <Button onClick={handleAddFunds} className="w-full font-headline">
-                            Add {amount.toLocaleString()} Credits
+                        <Button onClick={handleAddFunds} className="w-full font-headline" disabled={loading || creditsLoading}>
+                           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                           {loading ? "Processing..." : `Add ${amount.toLocaleString()} Credits`}
                         </Button>
                     </CardContent>
                 </Card>
