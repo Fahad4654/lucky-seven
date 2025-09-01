@@ -45,7 +45,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
                 }
 
                 const accountData = await accountResponse.json();
-                const fetchedAccountId = accountData.account?.id;
+                const fetchedAccountId = accountData.account?.id || accountData.id;
 
                 if (!fetchedAccountId) {
                     throw new Error('Account ID not found in response.');
