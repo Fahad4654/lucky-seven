@@ -34,7 +34,7 @@ const api = async (url: string, options: RequestInit = {}) => {
     options.headers = {
         ...options.headers,
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${accessToken}`,
     };
 
     let response = await fetch(`${API_BASE_URL}${url}`, options);
