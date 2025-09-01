@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useAuth } from '@/context/auth-context';
@@ -30,16 +31,19 @@ const refreshToken = async () => {
 const api = async (url: string, options: RequestInit = {}) => {
     let accessToken = localStorage.getItem('accessToken');
 
-    // Add Authorization header
-    options.headers = {
-        ...options.headers,
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        ...options.headers,
     };
+    if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
+    options.headers = headers;
 
     let response = await fetch(`${API_BASE_URL}${url}`, options);
 
-    if (response.status === 401) {
+    if (response.status === 401 && accessToken) {
         try {
             const newAccessToken = await refreshToken();
             // Update header with new token
@@ -48,7 +52,6 @@ const api = async (url: string, options: RequestInit = {}) => {
             response = await fetch(`${API_BASE_URL}${url}`, options);
         } catch (error) {
             // If refresh fails, we can't recover.
-            // The useAuth hook should handle this, or we can force a logout.
             console.error('Session expired. Please log in again.', error);
             // This is where you might call a logout function.
             // For now, we'll re-throw the error.
