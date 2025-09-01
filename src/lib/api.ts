@@ -30,12 +30,17 @@ const refreshToken = async () => {
 const api = async (url: string, options: RequestInit = {}) => {
     let accessToken = localStorage.getItem('accessToken');
 
-    // Add Authorization header
-    options.headers = {
-        ...options.headers,
-        'Content-Type': 'application/json',
+    const headers: Record<string, string> = {
         'Authorization': `Bearer ${accessToken}`,
+        ...options.headers,
     };
+
+    // Only set Content-Type for methods that have a body
+    if (options.body) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    options.headers = headers;
 
     let response = await fetch(`${API_BASE_URL}${url}`, options);
 
@@ -45,7 +50,7 @@ const api = async (url: string, options: RequestInit = {}) => {
             // Update header with new token
             (options.headers as Record<string, string>)['Authorization'] = `Bearer ${newAccessToken}`;
             // Retry the original request
-            response = await fetch(`${API_BASE_URL}${url}`, options);
+            response = await fetch(`${API_BE_URL}${url}`, options);
         } catch (error) {
             // If refresh fails, we can't recover.
             // The useAuth hook should handle this, or we can force a logout.
