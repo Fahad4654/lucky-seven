@@ -40,12 +40,12 @@ export default function WalletPage() {
 
                 const combinedHistory: HistoryEntry[] = [];
 
-                if (transactionRes.ok && transactionData.balancetransactions) {
-                    combinedHistory.push(...transactionData.balancetransactions);
+                if (transactionRes.ok && transactionData.balancetransaction) {
+                    combinedHistory.push(...(Array.isArray(transactionData.balancetransaction) ? transactionData.balancetransaction : [transactionData.balancetransaction]));
                 }
 
-                if (gameHistoryRes.ok && gameHistoryData.gamehistories) {
-                     combinedHistory.push(...gameHistoryData.gamehistories);
+                if (gameHistoryRes.ok && gameHistoryData.gamehistory) {
+                     combinedHistory.push(...(Array.isArray(gameHistoryData.gamehistory) ? gameHistoryData.gamehistory : [gameHistoryData.gamehistory]));
                 }
 
                 combinedHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
