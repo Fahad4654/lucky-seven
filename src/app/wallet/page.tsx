@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCredits } from "@/context/credits-context";
 import { Banknote, History, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import api from "@/lib/api";
@@ -16,7 +16,7 @@ import HistoryItem, { type HistoryEntry } from "@/components/shared/history-item
 
 export default function WalletPage() {
     const { user } = useAuth();
-    const { credits, accountId, balanceId, loading: creditsLoading, setCredits } = useCredits();
+    const { credits, accountId, balanceId, loading: creditsLoading } = useCredits();
     const [amount, setAmount] = useState(100);
     const [trxId, setTrxId] = useState("");
     const [loading, setLoading] = useState(false);
@@ -24,48 +24,48 @@ export default function WalletPage() {
     const [historyLoading, setHistoryLoading] = useState(true);
     const { toast } = useToast();
     
-    useEffect(() => {
-        const fetchHistory = async () => {
-            if (!user) return;
-            setHistoryLoading(true);
+    const fetchHistory = useCallback(async () => {
+        if (!user) return;
+        setHistoryLoading(true);
 
-            try {
-                const [transactionRes, gameHistoryRes] = await Promise.all([
-                    api('/find/transaction', { method: 'POST', body: JSON.stringify({ userId: user.id }) }),
-                    api('/find/game-history', { method: 'POST', body: JSON.stringify({ userId: user.id }) })
-                ]);
-                
-                const transactionData = await transactionRes.json();
-                const gameHistoryData = await gameHistoryRes.json();
+        try {
+            const [transactionRes, gameHistoryRes] = await Promise.all([
+                api('/find/transaction', { method: 'POST', body: JSON.stringify({ userId: user.id }) }),
+                api('/find/game-history', { method: 'POST', body: JSON.stringify({ userId: user.id }) })
+            ]);
+            
+            const transactionData = await transactionRes.json();
+            const gameHistoryData = await gameHistoryRes.json();
 
-                const combinedHistory: HistoryEntry[] = [];
+            const combinedHistory: HistoryEntry[] = [];
 
-                if (transactionRes.ok && transactionData.balancetransaction) {
-                    combinedHistory.push(...(Array.isArray(transactionData.balancetransaction) ? transactionData.balancetransaction : [transactionData.balancetransaction]));
-                }
-
-                if (gameHistoryRes.ok && gameHistoryData.gamehistory) {
-                     combinedHistory.push(...(Array.isArray(gameHistoryData.gamehistory) ? gameHistoryData.gamehistory : [gameHistoryData.gamehistory]));
-                }
-
-                combinedHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                setHistory(combinedHistory);
-
-            } catch (error) {
-                toast({
-                    title: "Error fetching history",
-                    description: "Could not load transaction or game history.",
-                    variant: "destructive"
-                });
-            } finally {
-                setHistoryLoading(false);
+            if (transactionRes.ok && transactionData.balancetransaction) {
+                combinedHistory.push(...(Array.isArray(transactionData.balancetransaction) ? transactionData.balancetransaction : [transactionData.balancetransaction]));
             }
-        };
 
+            if (gameHistoryRes.ok && gameHistoryData.gamehistory) {
+                 combinedHistory.push(...(Array.isArray(gameHistoryData.gamehistory) ? gameHistoryData.gamehistory : [gameHistoryData.gamehistory]));
+            }
+
+            combinedHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            setHistory(combinedHistory);
+
+        } catch (error) {
+            toast({
+                title: "Error fetching history",
+                description: "Could not load transaction or game history.",
+                variant: "destructive"
+            });
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, [user, toast]);
+
+    useEffect(() => {
         if (user) {
             fetchHistory();
         }
-    }, [user, toast]);
+    }, [user, fetchHistory]);
     
     const handleAddFunds = async () => {
         if (!user || !accountId || !balanceId) {
@@ -116,6 +116,8 @@ export default function WalletPage() {
             });
             setAmount(100);
             setTrxId("");
+            // Refresh the history
+            await fetchHistory();
 
         } catch (error: any) {
              toast({
