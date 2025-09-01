@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +27,7 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+    const effectRan = useRef(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -54,10 +55,23 @@ export default function ProfilePage() {
                 setLoading(false);
             }
         };
-
-        if (user) {
-            fetchProfile();
+        
+        if (process.env.NODE_ENV === 'development') {
+            if (!effectRan.current) {
+                if (user) {
+                    fetchProfile();
+                }
+            }
+            return () => {
+                effectRan.current = true;
+            };
+        } else {
+             if (user) {
+                fetchProfile();
+            }
         }
+
+
     }, [user, toast]);
 
     const pageLoading = authLoading || loading;
