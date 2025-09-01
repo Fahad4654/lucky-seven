@@ -33,8 +33,9 @@ export default function ProfilePage() {
             if (!user) return;
             setLoading(true);
             try {
-                const response = await api(`/find/profile?userId=${user.id}`, {
+                const response = await api('/find/profile', {
                     method: 'GET',
+                    body: JSON.stringify({ userId: user.id }),
                 });
 
                 if (!response.ok) {
