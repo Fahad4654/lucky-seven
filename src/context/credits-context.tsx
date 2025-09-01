@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { useAuth } from './auth-context';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const { toast } = useToast();
+    const effectRan = useRef(false);
 
     useEffect(() => {
         const fetchCredits = async () => {
@@ -78,8 +79,22 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
                 setLoading(false);
             }
         };
+        
+        if (process.env.NODE_ENV === 'development') {
+            if (!effectRan.current) {
+                 if (user) {
+                    fetchCredits();
+                }
+            }
+             return () => {
+                effectRan.current = true;
+            };
+        } else {
+            if (user) {
+                fetchCredits();
+            }
+        }
 
-        fetchCredits();
     }, [user, toast]);
     
     return (
