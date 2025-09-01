@@ -6,19 +6,66 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCredits } from "@/context/credits-context";
-import { Banknote, History, Landmark, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Banknote, History, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import api from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import HistoryItem, { type HistoryEntry } from "@/components/shared/history-item";
 
 export default function WalletPage() {
     const { user } = useAuth();
-    const { credits, accountId, balanceId, loading: creditsLoading } = useCredits();
+    const { credits, accountId, balanceId, loading: creditsLoading, setCredits } = useCredits();
     const [amount, setAmount] = useState(100);
     const [trxId, setTrxId] = useState("");
     const [loading, setLoading] = useState(false);
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
     const { toast } = useToast();
+    
+    useEffect(() => {
+        const fetchHistory = async () => {
+            if (!user) return;
+            setHistoryLoading(true);
+
+            try {
+                const [transactionRes, gameHistoryRes] = await Promise.all([
+                    api('/find/transaction', { method: 'POST', body: JSON.stringify({ userId: user.id }) }),
+                    api('/find/game-history', { method: 'POST', body: JSON.stringify({ userId: user.id }) })
+                ]);
+                
+                const transactionData = await transactionRes.json();
+                const gameHistoryData = await gameHistoryRes.json();
+
+                const combinedHistory: HistoryEntry[] = [];
+
+                if (transactionRes.ok && transactionData.balancetransactions) {
+                    combinedHistory.push(...transactionData.balancetransactions);
+                }
+
+                if (gameHistoryRes.ok && gameHistoryData.gamehistories) {
+                     combinedHistory.push(...gameHistoryData.gamehistories);
+                }
+
+                combinedHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                setHistory(combinedHistory);
+
+            } catch (error) {
+                toast({
+                    title: "Error fetching history",
+                    description: "Could not load transaction or game history.",
+                    variant: "destructive"
+                });
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        if (user) {
+            fetchHistory();
+        }
+    }, [user, toast]);
     
     const handleAddFunds = async () => {
         if (!user || !accountId || !balanceId) {
@@ -143,37 +190,20 @@ export default function WalletPage() {
                         <CardTitle className="font-headline text-xl sm:text-2xl flex items-center gap-2">
                            <History/> History
                         </CardTitle>
-                         <CardDescription>Your recent transactions.</CardDescription>
+                         <CardDescription>Your recent transactions and game results.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
-                       <div className="flex justify-between items-center">
-                           <div>
-                               <p className="font-semibold">Won Blackjack</p>
-                               <p className="text-muted-foreground text-xs">Today</p>
-                           </div>
-                           <p className="text-green-400 font-bold">+ 200</p>
-                       </div>
-                        <div className="flex justify-between items-center">
-                           <div>
-                               <p className="font-semibold">Slot Machine Bet</p>
-                               <p className="text-muted-foreground text-xs">Today</p>
-                           </div>
-                           <p className="text-red-500 font-bold">- 50</p>
-                       </div>
-                       <div className="flex justify-between items-center">
-                           <div>
-                               <p className="font-semibold">Added Funds</p>
-                               <p className="text-muted-foreground text-xs">Yesterday</p>
-                           </div>
-                           <p className="text-green-400 font-bold">+ 1,000</p>
-                       </div>
-                        <div className="flex justify-between items-center">
-                           <div>
-                               <p className="font-semibold">Poker Loss</p>
-                               <p className="text-muted-foreground text-xs">Yesterday</p>
-                           </div>
-                           <p className="text-red-500 font-bold">- 100</p>
-                       </div>
+                    <CardContent className="space-y-4 text-sm max-h-96 overflow-y-auto pr-2">
+                      {historyLoading ? (
+                        <div className="space-y-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                      ) : history.length > 0 ? (
+                        history.map((item) => <HistoryItem key={item.id} item={item} />)
+                      ) : (
+                        <p className="text-muted-foreground text-center">No history found.</p>
+                      )}
                     </CardContent>
                 </Card>
             </div>
