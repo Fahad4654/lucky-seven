@@ -45,7 +45,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
                 }
 
                 const accountData = await accountResponse.json();
-                const fetchedAccountId = accountData.account?.id || accountData.id;
+                const fetchedAccountId = accountData.account?.[0]?.id;
 
                 if (!fetchedAccountId) {
                     throw new Error('Account ID not found in response.');
@@ -63,8 +63,10 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
                 }
 
                 const balanceData = await balanceResponse.json();
-                const availableBalance = balanceData.balance?.availableBalance;
-                const fetchedBalanceId = balanceData.balance?.id;
+                const balanceInfo = balanceData.balance?.[0];
+                const availableBalance = balanceInfo?.availableBalance;
+                const fetchedBalanceId = balanceInfo?.id;
+
 
                 if (availableBalance !== undefined) {
                     setCredits(parseFloat(availableBalance));
