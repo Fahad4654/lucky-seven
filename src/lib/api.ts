@@ -32,15 +32,11 @@ const api = async (url: string, options: RequestInit = {}) => {
     let accessToken = localStorage.getItem('accessToken');
 
     const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
         ...options.headers,
     };
     if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    // Set Content-Type if a body is present, regardless of method.
-    if (options.body) {
-        headers['Content-Type'] = 'application/json';
     }
 
     options.headers = headers;
