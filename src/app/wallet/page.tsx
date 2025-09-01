@@ -14,8 +14,9 @@ import api from "@/lib/api";
 
 export default function WalletPage() {
     const { user } = useAuth();
-    const { credits, setCredits, accountId, balanceId, loading: creditsLoading } = useCredits();
+    const { credits, accountId, balanceId, loading: creditsLoading } = useCredits();
     const [amount, setAmount] = useState(100);
+    const [trxId, setTrxId] = useState("");
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     
@@ -29,9 +30,17 @@ export default function WalletPage() {
             return;
         }
 
+        if (!trxId) {
+             toast({
+                title: "Transaction ID Required",
+                description: "Please enter the transaction ID.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setLoading(true);
         try {
-            const trxId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
             const response = await api('/transaction', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -42,7 +51,7 @@ export default function WalletPage() {
                     direction: "credit",
                     amount: amount.toString(),
                     currency: "BDT",
-                    description: "Added funds from website",
+                    description: "Deposit request from website",
                     trxId: trxId,
                     status: "pending"
                 })
@@ -54,16 +63,16 @@ export default function WalletPage() {
                 throw new Error(data.message || 'Failed to create transaction.');
             }
 
-            setCredits(c => c + amount);
             toast({
-                title: "Transaction Successful",
-                description: `${amount.toLocaleString()} credits have been added to your balance.`,
+                title: "Request Submitted",
+                description: `Your request to add ${amount.toLocaleString()} credits is pending approval.`,
             });
             setAmount(100);
+            setTrxId("");
 
         } catch (error: any) {
              toast({
-                title: "Failed to Add Funds",
+                title: "Failed to Submit Request",
                 description: error.message || 'An unknown error occurred.',
                 variant: "destructive",
             });
@@ -94,7 +103,7 @@ export default function WalletPage() {
                         <CardTitle className="font-headline text-xl sm:text-2xl flex items-center gap-2">
                            <Banknote/> Add Funds
                         </CardTitle>
-                        <CardDescription>Top up your balance to keep playing.</CardDescription>
+                        <CardDescription>Request a top-up. Your balance will be updated after admin approval.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                          <div className="space-y-2">
@@ -108,9 +117,20 @@ export default function WalletPage() {
                                 disabled={loading}
                             />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="trxId">Transaction ID</Label>
+                            <Input 
+                                id="trxId" 
+                                type="text" 
+                                value={trxId}
+                                onChange={(e) => setTrxId(e.target.value)}
+                                placeholder="Enter your transaction ID"
+                                disabled={loading}
+                            />
+                        </div>
                         <Button onClick={handleAddFunds} className="w-full font-headline" disabled={loading || creditsLoading}>
                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                           {loading ? "Processing..." : `Add ${amount.toLocaleString()} Credits`}
+                           {loading ? "Submitting..." : `Request ${amount.toLocaleString()} Credits`}
                         </Button>
                     </CardContent>
                 </Card>
