@@ -50,7 +50,7 @@ const api = async (url: string, options: RequestInit = {}) => {
             // Update header with new token
             (options.headers as Record<string, string>)['Authorization'] = `Bearer ${newAccessToken}`;
             // Retry the original request
-            response = await fetch(`${API_BE_URL}${url}`, options);
+            response = await fetch(`${API_BASE_URL}${url}`, options);
         } catch (error) {
             // If refresh fails, we can't recover.
             // The useAuth hook should handle this, or we can force a logout.
