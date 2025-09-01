@@ -17,6 +17,7 @@ interface ProfileData {
     avatarUrl: string | null;
     address: string | null;
     referralCode: string;
+    referredCode: string | null;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -122,6 +123,10 @@ export default function ProfilePage() {
                             <div className="bg-background/50 p-3 rounded-md">
                                 <p className="text-muted-foreground">Referral Code</p>
                                 <p className="font-semibold">{profile?.referralCode || 'N/A'}</p>
+                            </div>
+                             <div className="bg-background/50 p-3 rounded-md">
+                                <p className="text-muted-foreground">Referred Code</p>
+                                <p className="font-semibold">{profile?.referredCode || 'N/A'}</p>
                             </div>
                             <div className="bg-background/50 p-3 rounded-md">
                                 <p className="text-muted-foreground">Member Since</p>
