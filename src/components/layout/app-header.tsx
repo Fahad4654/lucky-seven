@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Coins, LogOut, Home } from "lucide-react";
+import { Coins, LogOut, Home, Loader2 } from "lucide-react";
 import { useCredits } from "@/context/credits-context";
 import { useAuth } from "@/context/auth-context";
 
 export default function AppHeader() {
-  const { credits, setCredits } = useCredits();
+  const { credits, setCredits, loading: creditsLoading } = useCredits();
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/register';
@@ -37,9 +37,13 @@ export default function AppHeader() {
           <>
             <div className="flex items-center gap-2">
               <Coins className="h-6 w-6 text-primary" />
-              <span className="font-headline text-lg sm:text-xl font-bold text-primary">
-                {credits.toLocaleString()}
-              </span>
+              <div className="font-headline text-lg sm:text-xl font-bold text-primary">
+                 {creditsLoading ? (
+                   <Loader2 className="h-5 w-5 animate-spin"/>
+                 ) : (
+                    <span>{credits.toLocaleString()}</span>
+                 )}
+              </div>
             </div>
             <Button variant="outline" size="sm" onClick={() => setCredits(c => c + 100)} className="hidden sm:inline-flex">
               Add Funds
